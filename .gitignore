@@ -345,6 +345,17 @@ docs/*SECURITY*.md
 docs/TEST_PLAN*.md
 docs/*TEST*.md
 
+# Release and Distribution Files
+# 发布和分发文件 - 不应上传到代码仓库
+releases/
+dist/
+publish/
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
 # Application Security Files
 # 应用安全文件 - 绝对不能上传
 .master_key
