@@ -1,11 +1,12 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+        xmlns:controls="using:ScoreManagerForSchool.UI.Controls"
         x:Class="ScoreManagerForSchool.UI.Views.LoginWindow"
         x:DataType="vm:LoginViewModel"
         Title="登录" Width="480" Height="260">
   <StackPanel Margin="12" Spacing="8">
-    <TextBox Watermark="用户密码" PasswordChar="•" Text="{Binding UserPassword, Mode=TwoWay}"/>
+    <controls:PasswordTextBox Watermark="用户密码" Text="{Binding UserPassword, Mode=TwoWay}"/>
     <StackPanel Orientation="Horizontal" Spacing="8">
       <Button Content="下一步" Command="{Binding NextCommand}"/>
       <Button Content="取消" Command="{Binding CancelCommand}"/>
@@ -23,8 +24,8 @@
         <TextBox Width="180" Watermark="答案2" Text="{Binding RecoveryAnswer2}"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="6">
-        <TextBox Width="220" Watermark="新密码(≥8)" PasswordChar="•" Text="{Binding NewPassword1}"/>
-        <TextBox Width="220" Watermark="确认新密码" PasswordChar="•" Text="{Binding NewPassword2}"/>
+        <controls:PasswordTextBox Width="220" Watermark="新密码(≥8)" Text="{Binding NewPassword1}"/>
+        <controls:PasswordTextBox Width="220" Watermark="确认新密码" Text="{Binding NewPassword2}"/>
         <Button Content="确认重置" Command="{Binding VerifyRecoveryCommand}"/>
       </StackPanel>
     </StackPanel>

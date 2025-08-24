@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             xmlns:controls="using:ScoreManagerForSchool.UI.Controls"
              x:Class="ScoreManagerForSchool.UI.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <ScrollViewer>
@@ -19,9 +20,9 @@
   <!-- 更改密码 -->
     <StackPanel Spacing="8">
       <TextBlock Text="更改密码" FontWeight="SemiBold"/>
-      <TextBox Watermark="当前用户密码（用于验证）" PasswordChar="●" Text="{Binding CurrentUserPassword, Mode=TwoWay}"/>
-      <TextBox Watermark="新用户密码（至少 8 位）" PasswordChar="●" Text="{Binding NewUserPassword, Mode=TwoWay}"/>
-      <TextBox Watermark="新用户密码确认" PasswordChar="●" Text="{Binding NewUserPasswordConfirm, Mode=TwoWay}"/>
+      <controls:PasswordTextBox Watermark="当前用户密码（用于验证）" Text="{Binding CurrentUserPassword, Mode=TwoWay}"/>
+      <controls:PasswordTextBox Watermark="新用户密码（至少 8 位）" Text="{Binding NewUserPassword, Mode=TwoWay}"/>
+      <controls:PasswordTextBox Watermark="新用户密码确认" Text="{Binding NewUserPasswordConfirm, Mode=TwoWay}"/>
       <Button Content="更改密码" Command="{Binding ChangePasswordCommand}" HorizontalAlignment="Left"/>
     </StackPanel>
 
@@ -50,7 +51,7 @@
           <TextBlock Margin="0 5" >姓名:</TextBlock>
           <TextBox Watermark="输入您的姓名"/>
           <TextBlock Margin="0 5" >密码:</TextBlock>
-          <TextBox PasswordChar="*" Watermark="输入您的密码"/>
+          <controls:PasswordTextBox Watermark="输入您的密码"/>
           <TextBlock Margin="0 15 0 5">备注:</TextBlock>
           <TextBox Height="100" AcceptsReturn="True" TextWrapping="Wrap" Watermark="在此输入多行文本..."/>
         </StackPanel>

@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ScoreManagerForSchool.Core.Storage;
 using ScoreManagerForSchool.UI.ViewModels;
+using ScoreManagerForSchool.UI.Controls;
 using Avalonia;
 using System;
 
@@ -26,7 +27,7 @@ namespace ScoreManagerForSchool.UI.Views
             // Ask for password to confirm
             var dlg = new Window { Title = "确认重置", Width = 420, Height = 200 };
             var info = new TextBlock { Text = "输入当前用户密码以确认重置：", Margin = new Thickness(0,0,0,8) };
-            var pwd = new TextBox { PasswordChar = '●' };
+            var pwd = new PasswordTextBox();
             var ok = new Button { Content = "确定" };
             var cancel = new Button { Content = "取消" };
             var panel = new StackPanel { Margin = new Thickness(12), Spacing = 8 };
