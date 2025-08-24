@@ -32,6 +32,32 @@ namespace ScoreManagerForSchool.UI.ViewModels
 
     public char[] UserPassword { get; set; } = Array.Empty<char>();
     public char[] UserPasswordConfirm { get; set; } = Array.Empty<char>();
+    
+    // String properties for UI binding
+    private string _userPasswordString = "";
+    public string UserPasswordString 
+    { 
+        get => _userPasswordString; 
+        set 
+        { 
+            _userPasswordString = value; 
+            UserPassword = value?.ToCharArray() ?? Array.Empty<char>();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserPasswordString)));
+        } 
+    }
+    
+    private string _userPasswordConfirmString = "";
+    public string UserPasswordConfirmString 
+    { 
+        get => _userPasswordConfirmString; 
+        set 
+        { 
+            _userPasswordConfirmString = value; 
+            UserPasswordConfirm = value?.ToCharArray() ?? Array.Empty<char>();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserPasswordConfirmString)));
+        } 
+    }
+    
     public string? UserHint { get; set; }
     // Security questions (two simple pairs)
     public string? Qa1Question { get; set; }

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ScoreManagerForSchool.UI.ViewModels;
+using ScoreManagerForSchool.UI.Controls;
 using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -33,25 +34,7 @@ public partial class OobeWindow : Window
         }
 
         // Build password inputs at runtime for better cross-platform compatibility
-        try
-        {
-            var host1 = this.FindControl<ContentControl>("UserPwdHost");
-            var host2 = this.FindControl<ContentControl>("UserPwdConfirmHost");
-            CreateRuntimePasswordPair(host1, "UserPwdBox");
-            CreateRuntimePasswordPair(host2, "UserPwdConfirmBox");
-
-            var t1 = this.FindControl<ToggleButton>("UserPwdToggle");
-            if (t1 != null && host1 != null)
-            {
-                t1.Click += (_, __) => ToggleRevealHost(host1, "UserPwdBox");
-            }
-            var t2 = this.FindControl<ToggleButton>("UserPwdConfirmToggle");
-            if (t2 != null && host2 != null)
-            {
-                t2.Click += (_, __) => ToggleRevealHost(host2, "UserPwdConfirmBox");
-            }
-        }
-        catch { }
+        // Now using custom PasswordTextBox controls defined in AXAML
     }
     private void ToggleReveal(TextBox box)
     {
@@ -338,8 +321,12 @@ public partial class OobeWindow : Window
     try { System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "smfs_oobe.log"), DateTime.UtcNow.ToString("o") + " OnFinish invoked\n"); } catch { }
         if (this.DataContext is OobeViewModel vm)
         {
-            string user = GetPassword("UserPwdBox", "UserPwdBoxPlain");
-            string userConf = GetPassword("UserPwdConfirmBox", "UserPwdConfirmBoxPlain");
+            // Get passwords from the new PasswordTextBox controls
+            var userPwdBox = this.FindControl<PasswordTextBox>("UserPwdBox");
+            var userPwdConfirmBox = this.FindControl<PasswordTextBox>("UserPwdConfirmBox");
+            
+            string user = userPwdBox?.Text ?? "";
+            string userConf = userPwdConfirmBox?.Text ?? "";
 
             // validation
             string? err = null;
@@ -351,9 +338,6 @@ public partial class OobeWindow : Window
             {
                 var mt = this.FindControl<TextBlock>("MessageText");
                 if (mt != null) mt.Text = err;
-                // highlight offending boxes via reflection
-                if (user.Length < 8) TrySetBackground("UserPwdBox", Colors.LightCoral);
-                if (user != userConf) TrySetBackground("UserPwdConfirmBox", Colors.LightCoral);
                 
                 await ShowMessageAsync(this, "验证失败", err);
                 try { System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "smfs_oobe.log"), DateTime.UtcNow.ToString("o") + " Validation failed: " + err + "\n"); } catch { }

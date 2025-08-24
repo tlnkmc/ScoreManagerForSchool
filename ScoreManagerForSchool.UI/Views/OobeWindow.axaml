@@ -2,6 +2,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
   xmlns:av="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls"
+  xmlns:controls="using:ScoreManagerForSchool.UI.Controls"
   x:Class="ScoreManagerForSchool.UI.Views.OobeWindow"
   x:DataType="vm:OobeViewModel"
   Title="首次运行设置 - ScoreManagerForSchool">
@@ -10,10 +11,8 @@
     <TextBlock Text="欢迎使用 ScoreManagerForSchool，请完成首次设置" FontWeight="Bold"/>
   <TextBlock Text="用户密码 (8~256):"/>
   <StackPanel Orientation="Horizontal" Spacing="6">
-    <ContentControl Name="UserPwdHost" Width="320" />
-    <ToggleButton Name="UserPwdToggle" Content="👁" Width="36"/>
-    <ContentControl Name="UserPwdConfirmHost" Width="320" />
-    <ToggleButton Name="UserPwdConfirmToggle" Content="👁" Width="36"/>
+    <controls:PasswordTextBox Name="UserPwdBox" Width="320" Watermark="输入用户密码" Text="{Binding UserPasswordString, Mode=TwoWay}"/>
+    <controls:PasswordTextBox Name="UserPwdConfirmBox" Width="320" Watermark="确认用户密码" Text="{Binding UserPasswordConfirmString, Mode=TwoWay}"/>
   </StackPanel>
   <TextBox Watermark="用户密码提示 (可选)" Text="{Binding UserHint}"/>
 
