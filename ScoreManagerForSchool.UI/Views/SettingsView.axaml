@@ -39,6 +39,23 @@
       <StackPanel Orientation="Horizontal" Spacing="8">
         <CheckBox IsChecked="{Binding StudentsCsvHeaderDefault}" Content="导入学生 CSV 默认首行为表头"/>
       </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <CheckBox IsChecked="{Binding EnableAcrylicEffect}" Content="启用窗口亚克力效果（毛玻璃背景）"/>
+      </StackPanel>
+      
+      <!-- 文本框示例区域 -->
+      <StackPanel Spacing="8" Margin="0,12,0,0">
+        <TextBlock Text="文本框示例" FontWeight="SemiBold"/>
+        <StackPanel Margin="20">
+          <TextBlock Margin="0 5" >姓名:</TextBlock>
+          <TextBox Watermark="输入您的姓名"/>
+          <TextBlock Margin="0 5" >密码:</TextBlock>
+          <TextBox PasswordChar="*" Watermark="输入您的密码"/>
+          <TextBlock Margin="0 15 0 5">备注:</TextBlock>
+          <TextBox Height="100" AcceptsReturn="True" TextWrapping="Wrap" Watermark="在此输入多行文本..."/>
+        </StackPanel>
+      </StackPanel>
+      
       <Button Content="保存主题/导入设置" Command="{Binding SaveCommand}" HorizontalAlignment="Left"/>
     </StackPanel>
 

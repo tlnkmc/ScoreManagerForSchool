@@ -8,7 +8,9 @@
         x:DataType="vm:MainWindowViewModel"
     x:Name="RootWindow"
     Icon="/Assets/avalonia-logo.ico"
-    Title="ScoreManagerForSchool">
+    Title="ScoreManagerForSchool"
+    TransparencyLevelHint="AcrylicBlur"
+    Background="Transparent">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -40,11 +42,22 @@
     </Window.Styles>
 
     <Grid ColumnDefinitions="220, *">
+        <!-- 亚克力背景 -->
+        <ExperimentalAcrylicBorder Grid.ColumnSpan="2" IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="0.1"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
         <!-- Sidebar: modern list style -->
-        <Border Grid.Column="0" Background="#FF1F1F23" Padding="8">
+        <Border Grid.Column="0" Background="{DynamicResource SystemAltHighColor}" Padding="8">
             <Grid RowDefinitions="Auto, *">
-                <TextBlock Text="ScoreManager" Foreground="White" FontWeight="SemiBold" Margin="8" Grid.Row="0" FontFamily="Segoe UI"/>
-                <ListBox x:Name="SidebarList" Grid.Row="1" Background="Transparent" BorderThickness="0" Foreground="White"
+                <TextBlock Text="ScoreManager" Foreground="{DynamicResource SystemBaseHighColor}" FontWeight="SemiBold" Margin="8" Grid.Row="0" FontFamily="Segoe UI"/>
+                <ListBox x:Name="SidebarList" Grid.Row="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SystemBaseHighColor}"
                          SelectedItem="{Binding SelectedPage, Mode=TwoWay}" ItemsSource="{Binding SidebarItems}"
                          VerticalAlignment="Stretch" MinHeight="120" FontFamily="Segoe UI"
                          Focusable="True" IsHitTestVisible="True" SelectionMode="Single">
@@ -53,7 +66,7 @@
                             <!-- Use a transparent Button so clicks always reach and we can handle selection robustly -->
                 <Button Background="Transparent" BorderThickness="0" Padding="8" HorizontalContentAlignment="Left" Click="OnSidebarButtonClick"
                     HorizontalAlignment="Stretch" Margin="0">
-                                <TextBlock Text="{Binding}" Foreground="White" FontSize="14" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding}" Foreground="{DynamicResource SystemBaseHighColor}" FontSize="14" VerticalAlignment="Center" />
                             </Button>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -64,10 +77,10 @@
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                         <Style Selector="ListBoxItem:hover">
-                            <Setter Property="Background" Value="#112D6AE0" />
+                            <Setter Property="Background" Value="{DynamicResource SystemListLowColor}" />
                         </Style>
                         <Style Selector="ListBoxItem:selected">
-                            <Setter Property="Background" Value="#223366" />
+                            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
                         </Style>
                     </ListBox.Styles>
                 </ListBox>

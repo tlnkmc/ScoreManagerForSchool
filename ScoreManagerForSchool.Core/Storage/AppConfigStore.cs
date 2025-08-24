@@ -8,6 +8,7 @@ namespace ScoreManagerForSchool.Core.Storage
     {
         public string Theme { get; set; } = "System"; // System | Light | Dark
         public bool StudentsCsvHeaderDefault { get; set; } = true;
+        public bool EnableAcrylicEffect { get; set; } = false; // 启用亚克力效果
     // Advanced settings
     public bool AutoStart { get; set; } = false;
     public bool AutoUpdateCheck { get; set; } = false;

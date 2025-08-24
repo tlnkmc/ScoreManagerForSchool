@@ -6,6 +6,9 @@ using ScoreManagerForSchool.Core.Storage;
 using ScoreManagerForSchool.UI.Views;
 using ScoreManagerForSchool.Core.Logging;
 using ScoreManagerForSchool.UI.Services;
+using System.IO;
+using Avalonia.Media;
+using Avalonia.Platform;
 
 namespace ScoreManagerForSchool.UI.Views
 {
@@ -39,6 +42,10 @@ namespace ScoreManagerForSchool.UI.Views
                         ErrorHandler.HandleError(ex, "页面切换时发生错误", "MainWindow.PropertyChanged");
                     }
                 };
+                
+                // 初始化亚克力效果设置
+                InitializeAcrylicEffect();
+                
                 this.Opened += MainWindow_Opened;
             }
             catch (Exception ex)
@@ -155,7 +162,13 @@ namespace ScoreManagerForSchool.UI.Views
                         host.Content = new SchemeManagementView();
                         break;
                     case "设置":
-                        host.Content = new SettingsView();
+                        var settingsView = new SettingsView();
+                        // 设置亚克力效果更新委托
+                        if (settingsView.DataContext is SettingsViewModel settingsVm)
+                        {
+                            settingsVm.UpdateAcrylicEffect = UpdateAcrylicEffect;
+                        }
+                        host.Content = settingsView;
                         break;
                     case "关于":
                         host.Content = new AboutView();
@@ -221,6 +234,52 @@ namespace ScoreManagerForSchool.UI.Views
             {
                 Logger.LogError("侧边栏按钮点击处理失败", "MainWindow.OnSidebarButtonClick", ex);
                 ErrorHandler.HandleError(ex, "侧边栏按钮响应失败", "MainWindow.OnSidebarButtonClick");
+            }
+        }
+
+        public void UpdateAcrylicEffect(bool enable)
+        {
+            ApplyAcrylicEffect(enable);
+        }
+
+        private void InitializeAcrylicEffect()
+        {
+            try
+            {
+                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                var store = new AppConfigStore(baseDir);
+                var config = store.Load();
+                
+                ApplyAcrylicEffect(config.EnableAcrylicEffect);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("初始化亚克力效果失败", "MainWindow.InitializeAcrylicEffect", ex);
+                // 如果加载配置失败，默认禁用亚克力效果
+                ApplyAcrylicEffect(false);
+            }
+        }
+
+        private void ApplyAcrylicEffect(bool enable)
+        {
+            try
+            {
+                if (enable)
+                {
+                    // 启用亚克力效果
+                    this.TransparencyLevelHint = new[] { Avalonia.Controls.WindowTransparencyLevel.AcrylicBlur };
+                    this.Background = new SolidColorBrush(Colors.Transparent);
+                }
+                else
+                {
+                    // 禁用亚克力效果，使用默认背景
+                    this.TransparencyLevelHint = new[] { Avalonia.Controls.WindowTransparencyLevel.None };
+                    this.Background = null; // 使用主题默认背景
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"应用亚克力效果失败: enable={enable}", "MainWindow.ApplyAcrylicEffect", ex);
             }
         }
     }

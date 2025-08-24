@@ -5,6 +5,8 @@ using System.Windows.Input;
 using ScoreManagerForSchool.Core.Storage;
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media;
 
 namespace ScoreManagerForSchool.UI.ViewModels
 {
@@ -15,11 +17,27 @@ namespace ScoreManagerForSchool.UI.ViewModels
         private readonly string _baseDir;
         private readonly AppConfigStore _store;
         private AppConfig _cfg;
+        
+        // 委托用于更新亚克力效果
+        public Action<bool>? UpdateAcrylicEffect { get; set; }
 
-        public string[] ThemeOptions { get; } = new[] { "System", "Light", "Dark" };
+        public string[] ThemeOptions { get; } = new[] { "跟随系统", "浅色", "深色" };
 
         private string _theme;
-        public string Theme { get => _theme; set { if (_theme != value) { _theme = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Theme))); } } }
+        public string Theme 
+        { 
+            get => _theme; 
+            set 
+            { 
+                if (_theme != value) 
+                { 
+                    _theme = value; 
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Theme)));
+                    // 立即应用主题
+                    ApplyThemeImmediately(value);
+                } 
+            } 
+        }
 
         private bool _studentsCsvHeaderDefault;
         public bool StudentsCsvHeaderDefault { get => _studentsCsvHeaderDefault; set { if (_studentsCsvHeaderDefault != value) { _studentsCsvHeaderDefault = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StudentsCsvHeaderDefault))); } } }
@@ -45,18 +63,38 @@ namespace ScoreManagerForSchool.UI.ViewModels
     private string? _themeAccent;
     public string? ThemeAccent { get => _themeAccent; set { if (_themeAccent != value) { _themeAccent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ThemeAccent))); } } }
 
+    private bool _enableAcrylicEffect;
+    public bool EnableAcrylicEffect { get => _enableAcrylicEffect; set { if (_enableAcrylicEffect != value) { _enableAcrylicEffect = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EnableAcrylicEffect))); } } }
+
+    // 密码修改相关属性
+    private string _currentUserPassword = "";
+    public string CurrentUserPassword { get => _currentUserPassword; set { if (_currentUserPassword != value) { _currentUserPassword = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentUserPassword))); } } }
+
+    private string _newUserPassword = "";
+    public string NewUserPassword { get => _newUserPassword; set { if (_newUserPassword != value) { _newUserPassword = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewUserPassword))); } } }
+
+    private string _newUserPasswordConfirm = "";
+    public string NewUserPasswordConfirm { get => _newUserPasswordConfirm; set { if (_newUserPasswordConfirm != value) { _newUserPasswordConfirm = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewUserPasswordConfirm))); } } }
+
         public SettingsViewModel(string? baseDir = null)
         {
             _baseDir = string.IsNullOrEmpty(baseDir) ? Path.Combine(Directory.GetCurrentDirectory(), "base") : baseDir;
             _store = new AppConfigStore(_baseDir);
             _cfg = _store.Load();
-            _theme = _cfg.Theme;
+            // 将英文主题转换为中文显示
+            _theme = _cfg.Theme switch
+            {
+                "Light" => "浅色",
+                "Dark" => "深色",
+                _ => "跟随系统"
+            };
             _studentsCsvHeaderDefault = _cfg.StudentsCsvHeaderDefault;
             _autoStart = _cfg.AutoStart;
             _autoUpdateCheck = _cfg.AutoUpdateCheck;
             _updateFeedUrl = _cfg.UpdateFeedUrl;
             _updateSource = _cfg.UpdateSource;
             _themeAccent = _cfg.ThemeAccent;
+            _enableAcrylicEffect = _cfg.EnableAcrylicEffect;
 
             SaveCommand = new RelayCommand(_ => Save());
             ResetFilesCommand = new RelayCommand(_ => Database1Store.DeleteBaseFiles(_baseDir));
@@ -66,17 +104,26 @@ namespace ScoreManagerForSchool.UI.ViewModels
 
         private void Save()
         {
-            _cfg.Theme = Theme;
+            // 将中文主题转换为英文主题代码保存
+            var englishTheme = Theme switch
+            {
+                "浅色" => "Light",
+                "深色" => "Dark",
+                _ => "System"
+            };
+            
+            _cfg.Theme = englishTheme;
             _cfg.StudentsCsvHeaderDefault = StudentsCsvHeaderDefault;
             _cfg.AutoStart = AutoStart;
             _cfg.AutoUpdateCheck = AutoUpdateCheck;
             _cfg.UpdateFeedUrl = UpdateFeedUrl;
             _cfg.UpdateSource = UpdateSource;
             _cfg.ThemeAccent = ThemeAccent;
+            _cfg.EnableAcrylicEffect = EnableAcrylicEffect;
             _store.Save(_cfg);
             try
             {
-                Application.Current!.RequestedThemeVariant = _cfg.Theme switch
+                Application.Current!.RequestedThemeVariant = englishTheme switch
                 {
                     "Light" => ThemeVariant.Light,
                     "Dark" => ThemeVariant.Dark,
@@ -105,6 +152,13 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 {
                     UI.Services.AutostartManager.SetEnabled(_cfg.AutoStart);
                 }
+            }
+            catch { }
+            
+            // Apply acrylic effect
+            try
+            {
+                UpdateAcrylicEffect?.Invoke(_cfg.EnableAcrylicEffect);
             }
             catch { }
         }
@@ -136,11 +190,6 @@ namespace ScoreManagerForSchool.UI.ViewModels
             }
             catch { }
         }
-
-        // Change password fields (simple binding; secure variants can be added similarly to OOBE)
-    public string? CurrentUserPassword { get; set; }
-    public string? NewUserPassword { get; set; }
-    public string? NewUserPasswordConfirm { get; set; }
 
         private void ChangePassword()
         {
@@ -182,6 +231,28 @@ namespace ScoreManagerForSchool.UI.ViewModels
             var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToUpperInvariant();
             if (hex.Length > 235) hex = hex.Substring(0, 235);
             return "0D0007211145141919810" + hex;
+        }
+
+        private void ApplyThemeImmediately(string chineseTheme)
+        {
+            try
+            {
+                // 将中文主题转换为英文主题代码
+                var englishTheme = chineseTheme switch
+                {
+                    "浅色" => "Light",
+                    "深色" => "Dark",
+                    _ => "System"
+                };
+
+                Application.Current!.RequestedThemeVariant = englishTheme switch
+                {
+                    "Light" => ThemeVariant.Light,
+                    "Dark" => ThemeVariant.Dark,
+                    _ => ThemeVariant.Default
+                };
+            }
+            catch { }
         }
     }
 }
