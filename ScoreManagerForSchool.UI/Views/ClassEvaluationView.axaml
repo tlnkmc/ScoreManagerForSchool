@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ScoreManagerForSchool.UI.Views.ClassEvaluationView">
+  <StackPanel Margin="12" Spacing="8">
+    <TextBlock Text="班级评估" FontSize="20" FontWeight="Bold"/>
+    <TextBlock Text="班级评估功能正在开发中..."/>
+  </StackPanel>
+</UserControl>
