@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScoreManagerForSchool.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0010")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0-beta")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0-beta+3ce75b5a9db0a6062a44cad1ba85ee2ea9d74deb")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScoreManagerForSchool.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScoreManagerForSchool.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0010")]
