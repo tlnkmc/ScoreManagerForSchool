@@ -189,11 +189,61 @@ namespace ScoreManagerForSchool.UI.Views
         {
             try
             {
+                // 获取屏幕尺寸，使用默认值作为后备
+                var screenWidth = 1920.0;
+                var screenHeight = 1080.0;
+                
+                try
+                {
+                    if (this.VisualRoot is Window parentWindow && parentWindow.Screens.Primary != null)
+                    {
+                        screenWidth = parentWindow.Screens.Primary.WorkingArea.Width;
+                        screenHeight = parentWindow.Screens.Primary.WorkingArea.Height;
+                    }
+                }
+                catch { }
+                
+                // 计算最大尺寸为屏幕的3/4
+                var maxWidth = screenWidth * 0.75;
+                var maxHeight = screenHeight * 0.75;
+                
+                // 创建可滚动的内容
+                var textBlock = new TextBlock 
+                { 
+                    Text = message, 
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 0, 8)
+                };
+                
+                var scrollViewer = new ScrollViewer
+                {
+                    Content = textBlock,
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    MaxWidth = maxWidth - 48, // 减去边距
+                    MaxHeight = maxHeight - 120 // 减去标题栏和按钮的空间
+                };
+                
+                var ok = new Button 
+                { 
+                    Content = "确定", 
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right 
+                };
+                
                 var panel = new StackPanel { Margin = new Thickness(12), Spacing = 8 };
-                panel.Children.Add(new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
-                var ok = new Button { Content = "确定", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
+                panel.Children.Add(scrollViewer);
                 panel.Children.Add(ok);
-                var dlg = new Window { Title = title, Width = 420, Height = 160, Content = panel, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                
+                var dlg = new Window 
+                { 
+                    Title = title, 
+                    Content = panel, 
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    MaxWidth = maxWidth,
+                    MaxHeight = maxHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner 
+                };
+                
                 var tcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
                 ok.Click += (_, __) => { try { dlg.Close(); } catch { } tcs.TrySetResult(true); };
                 if (this.VisualRoot is Window owner)

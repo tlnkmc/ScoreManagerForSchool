@@ -482,11 +482,62 @@ public partial class OobeWindow : Window
 
     private async Task ShowMessageAsync(Window owner, string title, string message)
     {
+        // 获取屏幕尺寸，使用默认值作为后备
+        var screenWidth = 1920.0;
+        var screenHeight = 1080.0;
+        
+        try
+        {
+            if (owner?.Screens.Primary != null)
+            {
+                screenWidth = owner.Screens.Primary.WorkingArea.Width;
+                screenHeight = owner.Screens.Primary.WorkingArea.Height;
+            }
+        }
+        catch { }
+        
+        // 计算最大尺寸为屏幕的3/4
+        var maxWidth = screenWidth * 0.75;
+        var maxHeight = screenHeight * 0.75;
+        
+        // 创建可滚动的内容
+        var textBlock = new TextBlock 
+        { 
+            Text = message, 
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 8)
+        };
+        
+        var scrollViewer = new ScrollViewer
+        {
+            Content = textBlock,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            MaxWidth = maxWidth - 48, // 减去边距
+            MaxHeight = maxHeight - 120 // 减去标题栏和按钮的空间
+        };
+        
+        var ok = new Button 
+        { 
+            Content = "确定", 
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+        
         var root = new StackPanel { Margin = new Thickness(12) };
-        root.Children.Add(new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap });
-        var ok = new Button { Content = "确定", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right, Margin = new Thickness(0,8,0,0) };
+        root.Children.Add(scrollViewer);
         root.Children.Add(ok);
-        var dlg = new Window { Title = title, Width = 480, Height = 160, Content = root };
+        
+        var dlg = new Window 
+        { 
+            Title = title, 
+            Content = root,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            MaxWidth = maxWidth,
+            MaxHeight = maxHeight,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        
         var tcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
         ok.Click += (_, __) => { try { dlg.Close(); } catch { } tcs.TrySetResult(true); };
         if (owner != null)
