@@ -336,3 +336,17 @@ smfs_*.log
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Security and Encryption Documentation
+# 安全和加密相关文档 - 不应上传到公开仓库
+docs/ENCRYPTION_GUIDE*.md
+docs/*ENCRYPTION*.md
+docs/*SECURITY*.md
+docs/TEST_PLAN*.md
+docs/*TEST*.md
+
+# Application Security Files
+# 应用安全文件 - 绝对不能上传
+.master_key
+.app_instance
+*.edb
