@@ -3,7 +3,8 @@
              xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
              x:Class="ScoreManagerForSchool.UI.Views.InfoEntryView"
              x:DataType="vm:InfoEntryViewModel">
-  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
+  <ScrollViewer>
+    <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
     <TextBlock Text="信息录入" FontSize="20" FontWeight="Bold"/>
     <StackPanel Grid.Row="1" Spacing="8">
       <TextBlock Text="当前处理："/>
@@ -35,5 +36,6 @@
       <Button Content="跳过" Command="{Binding SkipCommand}"/>
       <Button Content="下一个" Command="{Binding NextCommand}"/>
     </StackPanel>
-  </Grid>
+    </Grid>
+  </ScrollViewer>
 </UserControl>

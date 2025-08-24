@@ -4,7 +4,8 @@
              xmlns:core="using:ScoreManagerForSchool.Core.Storage"
              x:Class="ScoreManagerForSchool.UI.Views.StatsView"
              x:DataType="vm:StatsViewModel">
-  <StackPanel Margin="12" Spacing="8">
+  <ScrollViewer>
+    <StackPanel Margin="12" Spacing="8">
     <TextBlock Text="积分统计" FontSize="20" FontWeight="Bold"/>
     <StackPanel Orientation="Horizontal" Spacing="8">
       <Button Content="刷新" Command="{Binding RefreshCommand}"/>
@@ -73,5 +74,6 @@
         </ListBox.ItemTemplate>
   </ListBox>
     </Grid>
-  </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

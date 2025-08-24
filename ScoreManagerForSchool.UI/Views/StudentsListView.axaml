@@ -6,7 +6,8 @@
              x:DataType="vm:StudentsViewModel"
              x:Name="Root">
 
-  <Border Padding="12">
+  <ScrollViewer>
+    <Border Padding="12">
     <StackPanel Spacing="8">
       <TextBlock Text="学生列表管理" FontSize="18" FontWeight="Bold"/>
 
@@ -128,6 +129,7 @@
         <Button Content="批量更改班级" Click="OnBulkChangeClass"/>
       </StackPanel>
     </StackPanel>
-  </Border>
+    </Border>
+  </ScrollViewer>
 
 </UserControl>

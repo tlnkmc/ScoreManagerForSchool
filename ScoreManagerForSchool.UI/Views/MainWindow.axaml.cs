@@ -65,7 +65,7 @@ namespace ScoreManagerForSchool.UI.Views
                 if (this.DataContext is MainWindowViewModel vm)
                 {
                     // set sidebar items now that App likely finished setting DataContext
-                    var sidebarItems = new List<string> { "首页", "信息录入", "积分统计", "积分记录管理", "学生列表管理", "教师和班级管理", "班级及评价方案管理", "设置", "关于" };
+                    var sidebarItems = new List<string> { "首页", "信息录入", "积分统计", "积分记录管理", "学生列表管理", "教师管理", "设置", "关于" };
                     vm.GetType().GetProperty("SidebarItems")?.SetValue(vm, sidebarItems);
                     
                     try
@@ -155,11 +155,8 @@ namespace ScoreManagerForSchool.UI.Views
                     case "学生列表管理":
                         host.Content = new StudentsListView();
                         break;
-                    case "教师和班级管理":
+                    case "教师管理":
                         host.Content = new TeacherManagementView();
-                        break;
-                    case "班级及评价方案管理":
-                        host.Content = new SchemeManagementView();
                         break;
                     case "设置":
                         var settingsView = new SettingsView();

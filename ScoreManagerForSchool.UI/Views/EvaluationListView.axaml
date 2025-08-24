@@ -6,7 +6,8 @@
              x:DataType="vm:EvaluationListViewModel"
              x:Name="Root">
 
-  <Border Padding="12">
+  <ScrollViewer>
+    <Border Padding="12">
     <StackPanel Spacing="8">
       <TextBlock Text="积分记录管理" FontSize="18" FontWeight="Bold"/>
 
@@ -237,5 +238,6 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </StackPanel>
-  </Border>
+    </Border>
+  </ScrollViewer>
 </UserControl>

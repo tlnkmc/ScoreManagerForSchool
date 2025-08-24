@@ -4,7 +4,8 @@
              xmlns:core="using:ScoreManagerForSchool.Core.Storage"
              x:Class="ScoreManagerForSchool.UI.Views.HomeView"
              x:DataType="vm:HomeViewModel">
-  <StackPanel Margin="12" Spacing="10">
+  <ScrollViewer>
+    <StackPanel Margin="12" Spacing="10">
     <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
       <TextBlock Grid.Column="0" Text="首页" FontSize="20" FontWeight="Bold"/>
       <TextBlock Grid.Column="1"/>
@@ -98,4 +99,5 @@
     </StackPanel>
 
   </StackPanel>
+  </ScrollViewer>
 </UserControl>

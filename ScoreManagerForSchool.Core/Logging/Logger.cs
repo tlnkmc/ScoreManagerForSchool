@@ -108,7 +108,7 @@ namespace ScoreManagerForSchool.Core.Logging
             {
                 try
                 {
-                    File.AppendAllText(_logFilePath, content + Environment.NewLine);
+                    File.AppendAllText(_logFilePath, content + Environment.NewLine, System.Text.Encoding.UTF8);
                 }
                 catch
                 {

@@ -8,9 +8,7 @@
         x:DataType="vm:MainWindowViewModel"
     x:Name="RootWindow"
     Icon="/Assets/avalonia-logo.ico"
-    Title="ScoreManagerForSchool"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent">
+    Title="ScoreManagerForSchool">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -42,16 +40,6 @@
     </Window.Styles>
 
     <Grid ColumnDefinitions="220, *">
-        <!-- 亚克力背景 -->
-        <ExperimentalAcrylicBorder Grid.ColumnSpan="2" IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    BackgroundSource="Digger"
-                    TintColor="Black"
-                    TintOpacity="0.1"
-                    MaterialOpacity="0.65" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
         
         <!-- Sidebar: modern list style -->
         <Border Grid.Column="0" Background="{DynamicResource SystemAltHighColor}" Padding="8">
