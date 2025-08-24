@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScoreManagerForSchool.UI.Views"
+        x:Class="ScoreManagerForSchool.UI.Views.ExportScoreDialog"
+        x:DataType="vm:ExportDialogViewModel"
+        Title="导出积分报表"
+        Width="500"
+        Height="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+  <Grid Margin="16" RowDefinitions="Auto,*,Auto,Auto">
+    <!-- 标题 -->
+    <TextBlock Grid.Row="0" Text="选择导出时间范围" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,16"/>
+    
+    <!-- 时间范围选择 -->
+    <StackPanel Grid.Row="1" Spacing="12">
+      <ComboBox Name="RangeCombo" SelectionChanged="OnRangeSelectionChanged">
+        <ComboBoxItem Tag="Today" IsSelected="True">今天</ComboBoxItem>
+        <ComboBoxItem Tag="Yesterday">昨天</ComboBoxItem>
+        <ComboBoxItem Tag="ThisWeek">本周</ComboBoxItem>
+        <ComboBoxItem Tag="Custom">自定义时间范围</ComboBoxItem>
+      </ComboBox>
+      
+      <!-- 自定义日期选择器 -->
+      <Grid ColumnDefinitions="*,Auto,*" IsVisible="{Binding IsCustomDateVisible}" Margin="0,8">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock Text="开始日期"/>
+          <DatePicker SelectedDate="{Binding StartDate}"/>
+        </StackPanel>
+        
+        <TextBlock Grid.Column="1" Text="至" VerticalAlignment="Center" Margin="8"/>
+        
+        <StackPanel Grid.Column="2" Spacing="4">
+          <TextBlock Text="结束日期"/>
+          <DatePicker SelectedDate="{Binding EndDate}"/>
+        </StackPanel>
+      </Grid>
+      
+      <!-- 范围描述 -->
+      <Border Background="#F5F5F5" Padding="12" CornerRadius="4" Margin="0,8">
+        <TextBlock Text="{Binding RangeDescription}" FontStyle="Italic" Foreground="#666"/>
+      </Border>
+      
+      <!-- 导出说明 -->
+      <StackPanel Spacing="8" Margin="0,16,0,0">
+        <TextBlock Text="导出内容包括：" FontWeight="SemiBold"/>
+        <TextBlock Text="• 指定时间范围内的学生积分记录" Margin="16,0,0,0"/>
+        <TextBlock Text="• 学生基本信息（班级、唯一号、姓名）" Margin="16,0,0,0"/>
+        <TextBlock Text="• 积分明细（时间、原因、分数）" Margin="16,0,0,0"/>
+        <TextBlock Text="• 累计统计信息" Margin="16,0,0,0"/>
+      </StackPanel>
+    </StackPanel>
+    
+    <!-- 分隔线 -->
+    <Rectangle Grid.Row="2" Height="1" Fill="#E0E0E0" Margin="0,16"/>
+    
+    <!-- 按钮区域 -->
+    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+      <Button Content="取消" Width="80" Click="OnCancelClick"/>
+      <Button Content="导出" Width="80" Click="OnExportClick"/>
+    </StackPanel>
+  </Grid>
+</Window>

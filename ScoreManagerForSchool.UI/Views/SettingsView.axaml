@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             x:Class="ScoreManagerForSchool.UI.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="12" Spacing="12">
+    <TextBlock Text="设置" FontSize="20" FontWeight="Bold"/>
+
+    <!-- 安全与存储（无边框，纵向） -->
+    <StackPanel Spacing="8">
+      <TextBlock Text="安全与存储" FontWeight="SemiBold"/>
+      <TextBlock Text="重置将删除 base 目录中的 Database1、提示、学生、班级与方案文件。"/>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Background="#C43E3E" Foreground="White" Content="重置基础数据文件" Click="OnResetClicked"/>
+      </StackPanel>
+    </StackPanel>
+
+  <!-- 更改密码 -->
+    <StackPanel Spacing="8">
+      <TextBlock Text="更改密码" FontWeight="SemiBold"/>
+      <TextBox Watermark="当前用户密码（用于验证）" PasswordChar="●" Text="{Binding CurrentUserPassword, Mode=TwoWay}"/>
+      <TextBox Watermark="新用户密码（至少 8 位）" PasswordChar="●" Text="{Binding NewUserPassword, Mode=TwoWay}"/>
+      <TextBox Watermark="新用户密码确认" PasswordChar="●" Text="{Binding NewUserPasswordConfirm, Mode=TwoWay}"/>
+      <Button Content="更改密码" Command="{Binding ChangePasswordCommand}" HorizontalAlignment="Left"/>
+    </StackPanel>
+
+    <!-- 主题（无边框） -->
+    <StackPanel Spacing="8">
+      <TextBlock Text="主题" FontWeight="SemiBold"/>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="主题：" VerticalAlignment="Center"/>
+        <ComboBox ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" MinWidth="120"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="强调色(#RRGGBB)：" VerticalAlignment="Center"/>
+        <TextBox Text="{Binding ThemeAccent}" MinWidth="120" Watermark="#0078D4"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <CheckBox IsChecked="{Binding StudentsCsvHeaderDefault}" Content="导入学生 CSV 默认首行为表头"/>
+      </StackPanel>
+      <Button Content="保存主题/导入设置" Command="{Binding SaveCommand}" HorizontalAlignment="Left"/>
+    </StackPanel>
+
+    <!-- 启动与更新（无边框） -->
+    <StackPanel Spacing="8">
+      <TextBlock Text="启动与更新" FontWeight="SemiBold"/>
+      <CheckBox IsChecked="{Binding AutoStart}" Content="开机自启动（Windows）"/>
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <CheckBox IsChecked="{Binding AutoUpdateCheck}" Content="自动检查更新"/>
+        <ComboBox ItemsSource="{Binding UpdateSourceOptions}" SelectedItem="{Binding UpdateSource}" Width="140"/>
+        <TextBox Text="{Binding UpdateFeedUrl}" Width="320" Watermark="自定义源 ver.txt URL" IsVisible="{Binding UpdateSource, Converter={StaticResource EqualsConverter}, ConverterParameter=Custom}"/>
+        <Button Content="立即检查" Command="{Binding CheckUpdateCommand}"/>
+      </StackPanel>
+      <TextBlock TextWrapping="Wrap" Opacity="0.7">
+        源说明：GitHub 为原始地址；Ghproxy 为加速（形如 https://gh-proxy.com/https://github.com/...）；自定义需直接填写 ver.txt 的下载地址。
+      </TextBlock>
+    </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ScoreManagerForSchool.UI.Views.AboutView">
+  <StackPanel Margin="12" Spacing="8">
+    <TextBlock Text="关于" FontSize="20" FontWeight="Bold"/>
+    <TextBlock Text="ScoreManagerForSchool"/>
+    <TextBlock Text="版本：开发中 (2025-08-24)"/>
+    <TextBlock Text="开源依赖：Avalonia、xUnit 等"/>
+
+    <Separator/>
+    <TextBlock Text="下载与分发" FontWeight="SemiBold"/>
+    <TextBlock TextWrapping="Wrap">
+      已生成各平台的自包含发行包，位于项目 releases 目录：
+      Windows: scoremgr-win-x64.zip / scoremgr-win-arm64.zip；
+      Linux: scoremgr-linux-x64.tar.gz；
+      macOS: scoremgr-osx-x64.tar.gz / scoremgr-osx-arm64.tar.gz。
+    </TextBlock>
+    <TextBlock TextWrapping="Wrap">
+      Windows 请解压后运行 scoremgr.exe；Linux/macOS 请赋予可执行权限后运行可执行文件。
+    </TextBlock>
+
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="打开发布目录" Click="OnOpenReleasesFolder"/>
+    </StackPanel>
+  </StackPanel>
+  
+</UserControl>

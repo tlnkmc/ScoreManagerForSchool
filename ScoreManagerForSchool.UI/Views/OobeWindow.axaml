@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+  xmlns:av="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls"
+  x:Class="ScoreManagerForSchool.UI.Views.OobeWindow"
+  x:DataType="vm:OobeViewModel"
+  Title="首次运行设置 - ScoreManagerForSchool">
+
+  <StackPanel Margin="16" Spacing="8">
+    <TextBlock Text="欢迎使用 ScoreManagerForSchool，请完成首次设置" FontWeight="Bold"/>
+  <TextBlock Text="用户密码 (8~256):"/>
+  <StackPanel Orientation="Horizontal" Spacing="6">
+    <ContentControl Name="UserPwdHost" Width="320" />
+    <ToggleButton Name="UserPwdToggle" Content="👁" Width="36"/>
+    <ContentControl Name="UserPwdConfirmHost" Width="320" />
+    <ToggleButton Name="UserPwdConfirmToggle" Content="👁" Width="36"/>
+  </StackPanel>
+  <TextBox Watermark="用户密码提示 (可选)" Text="{Binding UserHint}"/>
+
+  <StackPanel Spacing="6">
+    <TextBlock Text="密保问题 (用于找回密码)" FontWeight="SemiBold"/>
+    <StackPanel Orientation="Horizontal" Spacing="6">
+      <TextBox Name="Qa1QBox" Width="320" Watermark="问题1" Text="{Binding Qa1Question}"/>
+      <TextBox Name="Qa1ABox" Width="320" Watermark="答案1" Text="{Binding Qa1Answer}"/>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" Spacing="6">
+      <TextBox Name="Qa2QBox" Width="320" Watermark="问题2" Text="{Binding Qa2Question}"/>
+      <TextBox Name="Qa2ABox" Width="320" Watermark="答案2" Text="{Binding Qa2Answer}"/>
+    </StackPanel>
+  </StackPanel>
+
+      <StackPanel Orientation="Vertical" Spacing="6">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+  <TextBox Width="400" Name="StudentsPathBox" Watermark="学生名单 CSV 路径" Text="{Binding StudentsPath, Mode=TwoWay}"/>
+  <CheckBox Name="StudentsHeaderCheck" IsChecked="{Binding StudentsHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
+        <Button Content="浏览..." Click="OnBrowseStudents" />
+        <Button Content="格式说明" Click="OnShowFormatInfo" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+  <TextBox Width="400" Name="ClassesPathBox" Watermark="班级列表 CSV 路径" Text="{Binding ClassesPath, Mode=TwoWay}"/>
+  <CheckBox Name="ClassesHeaderCheck" IsChecked="{Binding ClassesHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
+        <Button Content="浏览..." Click="OnBrowseClasses" />
+        <Button Content="格式说明" Click="OnShowFormatInfo" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+  <TextBox Width="400" Name="SchemesPathBox" Watermark="评价方案 CSV 路径" Text="{Binding SchemesPath, Mode=TwoWay}"/>
+  <CheckBox Name="SchemesHeaderCheck" IsChecked="{Binding SchemesHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
+        <Button Content="浏览..." Click="OnBrowseSchemes" />
+        <Button Content="格式说明" Click="OnShowFormatInfo" />
+      </StackPanel>
+    </StackPanel>
+
+    <TextBlock Name="MessageText" Foreground="Red"/>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button Name="CancelButton" Content="取消" Click="OnCancel"/>
+      <Button Name="FinishButton" Content="完成并保存" Click="OnFinish"/>
+    </StackPanel>
+  </StackPanel>
+
+</Window>

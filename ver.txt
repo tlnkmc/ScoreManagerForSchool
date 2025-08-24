@@ -1,0 +1,16 @@
+# 学校积分管理器更新配置文件
+# 版本: 1.0.0-beta (内部版本 0010)
+
+Version=1.0.0.0010
+Notes=1.0.0 测试版本：新增拼音搜索、时间范围导出功能，修复平台兼容性问题
+
+# Windows 平台
+Winx64=github.com/tlnkmc/ScoreManagerForSchool/releases/download/1.0.0/scoremgr-win-x64.zip
+Winarm=github.com/tlnkmc/ScoreManagerForSchool/releases/download/1.0.0/scoremgr-win-arm64.zip
+
+# Linux 平台
+Linuxx64=github.com/tlnkmc/ScoreManagerForSchool/releases/download/1.0.0/scoremgr-linux-x64.tar.gz
+
+# macOS 平台
+Macosx64=github.com/tlnkmc/ScoreManagerForSchool/releases/download/1.0.0/scoremgr-osx-x64.tar.gz
+Macosarm=github.com/tlnkmc/ScoreManagerForSchool/releases/download/1.0.0/scoremgr-osx-arm64.tar.gz

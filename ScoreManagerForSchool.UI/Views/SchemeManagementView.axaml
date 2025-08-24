@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             xmlns:core="using:ScoreManagerForSchool.Core.Storage"
+             x:Class="ScoreManagerForSchool.UI.Views.SchemeManagementView"
+             x:DataType="vm:SchemeManagementViewModel"
+             x:Name="Root">
+  <StackPanel Margin="12" Spacing="10">
+    <TextBlock Text="班级及评价方案管理" FontSize="20" FontWeight="Bold"/>
+
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="新增班级" Command="{Binding AddClassCommand}"/>
+      <Button Content="新增方案" Command="{Binding AddSchemeCommand}"/>
+      <Button Content="保存更改" Command="{Binding SaveCommand}"/>
+    </StackPanel>
+
+    <!-- Import rows -->
+    <StackPanel Orientation="Vertical" Spacing="6">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+  <TextBox Width="360" Watermark="班级 CSV 路径 (含表头)" Name="ClassesCsvBox"/>
+  <Button Content="浏览" Click="OnBrowseClasses"/>
+        <CheckBox Name="ClassesHeaderCheck" IsChecked="True" Content="首行为表头" VerticalAlignment="Center"/>
+  <Button Content="导入班级" Click="OnImportClasses"/>
+  <Button Content="格式说明" Click="OnShowFormatInfo"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+  <TextBox Width="360" Watermark="方案 CSV 路径 (含表头)" Name="SchemesCsvBox"/>
+  <Button Content="浏览" Click="OnBrowseSchemes"/>
+        <CheckBox Name="SchemesHeaderCheck" IsChecked="True" Content="首行为表头" VerticalAlignment="Center"/>
+  <Button Content="导入方案" Click="OnImportSchemes"/>
+  <Button Content="格式说明" Click="OnShowFormatInfo"/>
+      </StackPanel>
+    </StackPanel>
+
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+      <!-- Classes table -->
+      <StackPanel>
+        <TextBlock Text="班级列表" FontWeight="SemiBold"/>
+        <Grid ColumnDefinitions="*,*,Auto" Margin="0,2">
+          <TextBlock Grid.Column="0" Text="班号" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="1" Text="类别" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="2" Text="操作" FontWeight="SemiBold"/>
+        </Grid>
+        <ListBox ItemsSource="{Binding Classes}" Height="260">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="core:ClassInfo">
+              <Grid ColumnDefinitions="*,*,Auto" Margin="0,2">
+                <TextBox Grid.Column="0" Text="{Binding Class, Mode=TwoWay}"/>
+                <TextBox Grid.Column="1" Text="{Binding Type, Mode=TwoWay}"/>
+                <Button Grid.Column="2" Content="删除" Command="{Binding #Root.DataContext.DeleteClassCommand}" CommandParameter="{Binding}"/>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </StackPanel>
+
+      <!-- Schemes table -->
+      <StackPanel Grid.Column="1">
+        <TextBlock Text="评价方案" FontWeight="SemiBold"/>
+        <Grid ColumnDefinitions="*,*,*,*,*,Auto" Margin="0,2">
+          <TextBlock Grid.Column="0" Text="项1" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="1" Text="项2" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="2" Text="项3" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="3" Text="项4" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="4" Text="项5" FontWeight="SemiBold"/>
+          <TextBlock Grid.Column="5" Text="操作" FontWeight="SemiBold"/>
+        </Grid>
+        <ListBox ItemsSource="{Binding Schemes}" Height="260">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="*,*,*,*,*,Auto" Margin="0,2">
+                <TextBox Grid.Column="0" Text="{Binding [0], Mode=TwoWay}"/>
+                <TextBox Grid.Column="1" Text="{Binding [1], Mode=TwoWay}"/>
+                <TextBox Grid.Column="2" Text="{Binding [2], Mode=TwoWay}"/>
+                <TextBox Grid.Column="3" Text="{Binding [3], Mode=TwoWay}"/>
+                <TextBox Grid.Column="4" Text="{Binding [4], Mode=TwoWay}"/>
+                <Button Grid.Column="5" Content="删除" Command="{Binding #Root.DataContext.DeleteSchemeCommand}" CommandParameter="{Binding}"/>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </StackPanel>
+    </Grid>
+
+    <!-- Dirty bar -->
+    <Border IsVisible="{Binding IsDirty}" Background="#FFFBE6" BorderBrush="#FADB14" BorderThickness="1" CornerRadius="6" Padding="8">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <TextBlock Text="有未保存的更改" VerticalAlignment="Center"/>
+        <Button Content="舍弃" Command="{Binding DiscardCommand}"/>
+        <Button Content="保存" Command="{Binding SaveCommand}"/>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

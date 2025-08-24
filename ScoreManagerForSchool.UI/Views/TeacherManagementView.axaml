@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             x:Class="ScoreManagerForSchool.UI.Views.TeacherManagementView"
+             x:DataType="vm:TeacherManagementViewModel">
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="12" RowSpacing="8">
+    
+    <!-- 标题 -->
+    <TextBlock Text="教师和班级管理" FontSize="20" FontWeight="Bold"/>
+    
+    <!-- 工具栏 -->
+    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+      <Button Content="导入教师" Command="{Binding ImportTeachersCommand}"/>
+      <Button Content="导出模板" Command="{Binding ExportTemplateCommand}"/>
+      <Button Content="刷新" Command="{Binding RefreshCommand}"/>
+      <Button Content="新增教师" Command="{Binding AddTeacherCommand}"/>
+      <Separator/>
+      <TextBox Width="200" Watermark="搜索教师（支持拼音）" Text="{Binding SearchQuery, Mode=TwoWay}"/>
+    </StackPanel>
+    
+    <!-- 主内容区 -->
+    <Grid Grid.Row="2" ColumnDefinitions="2*,*" ColumnSpacing="12">
+      
+      <!-- 教师列表 -->
+      <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="8">
+        <Grid RowDefinitions="Auto,*">
+          <TextBlock Text="教师列表" FontWeight="Bold" Margin="0,0,0,8"/>
+          <ListBox Grid.Row="1" ItemsSource="{Binding Teachers}" SelectedItem="{Binding SelectedTeacher, Mode=TwoWay}">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="8,4">
+                  <Grid ColumnDefinitions="80,100,80,80,*" ColumnSpacing="8">
+                    <TextBlock Text="{Binding Id}" FontSize="12"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Subject}" FontSize="12"/>
+                    <TextBlock Grid.Column="3" Text="{Binding SubjectGroup}" FontSize="12"/>
+                    <TextBlock Grid.Column="4" Text="{Binding ClassesText}" FontSize="12" 
+                               TextWrapping="Wrap" Foreground="Gray"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+      
+      <!-- 详情和科目组 -->
+      <StackPanel Spacing="8">
+        
+        <!-- 教师详情 -->
+        <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="8">
+          <Grid RowDefinitions="Auto,*" RowSpacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="教师详情" FontWeight="Bold"/>
+              <Button Content="保存" IsEnabled="{Binding IsTeacherSelected}" 
+                      Click="OnSaveTeacherClick"/>
+              <Button Content="删除" IsEnabled="{Binding IsTeacherSelected}" 
+                      Command="{Binding DeleteTeacherCommand}" CommandParameter="{Binding SelectedTeacher}"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="1" Spacing="6" IsEnabled="{Binding IsTeacherSelected}">
+              <Grid ColumnDefinitions="60,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="4">
+                <TextBlock Text="工号:" Grid.Row="0"/>
+                <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding SelectedTeacher.Id, Mode=TwoWay}"/>
+                
+                <TextBlock Text="姓名:" Grid.Row="1"/>
+                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding SelectedTeacher.Name, Mode=TwoWay}"/>
+                
+                <TextBlock Text="科目:" Grid.Row="2"/>
+                <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding SelectedTeacher.Subject, Mode=TwoWay}"/>
+                
+                <TextBlock Text="科目组:" Grid.Row="3"/>
+                <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding SelectedTeacher.SubjectGroup, Mode=TwoWay}"
+                         Watermark="选择科目组"/>
+                
+                <TextBlock Text="班级:" Grid.Row="4"/>
+                <TextBox Grid.Column="1" Grid.Row="4" 
+                         Text="{Binding ClassesText, Mode=TwoWay}" 
+                         Watermark="用分号分隔，如：一班;二班"/>
+              </Grid>
+            </StackPanel>
+          </Grid>
+        </Border>
+        
+        <!-- 科目组信息 -->
+        <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="8">
+          <Grid RowDefinitions="Auto,*">
+            <TextBlock Text="科目组" FontWeight="Bold" Margin="0,0,0,8"/>
+            <ScrollViewer Grid.Row="1" MaxHeight="200">
+              <ItemsControl ItemsSource="{Binding SubjectGroups}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="4">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="Gray"/>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Grid>
+        </Border>
+        
+      </StackPanel>
+    </Grid>
+    
+    <!-- 状态栏 -->
+    <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="Gray" FontSize="12"/>
+    
+  </Grid>
+</UserControl>

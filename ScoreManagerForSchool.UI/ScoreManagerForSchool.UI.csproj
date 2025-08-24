@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  <AssemblyName>scoremgr</AssemblyName>
+  <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+  <AssemblyVersion>1.0.0.0010</AssemblyVersion>
+  <FileVersion>1.0.0.0010</FileVersion>
+  <InformationalVersion>1.0.0-beta</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
+    <Content Include="Assets\scoremgr.ico" Condition="Exists('Assets\\scoremgr.ico')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.4" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.4">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="NPinyin" Version="0.2.6321.26573" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScoreManagerForSchool.Core\ScoreManagerForSchool.Core.csproj" />
+  </ItemGroup>
+
+  <!-- 将 Updater 可执行复制到发布目录（需要先发布 Updater 对应 RID） -->
+  <Target Name="CopyUpdaterToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <UpdaterFiles Include="..\ScoreManagerForSchool.Updater\bin\$(Configuration)\net8.0\$(RuntimeIdentifier)\publish\update*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UpdaterFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="Exists('%(UpdaterFiles.Identity)')" />
+  </Target>
+</Project>

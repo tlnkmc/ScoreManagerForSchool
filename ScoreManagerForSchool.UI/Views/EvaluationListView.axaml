@@ -1,0 +1,241 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             xmlns:core="using:ScoreManagerForSchool.Core.Storage"
+             x:Class="ScoreManagerForSchool.UI.Views.EvaluationListView"
+             x:DataType="vm:EvaluationListViewModel"
+             x:Name="Root">
+
+  <Border Padding="12">
+    <StackPanel Spacing="8">
+      <TextBlock Text="积分记录管理" FontSize="18" FontWeight="Bold"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBox Width="300" Watermark="搜索 (姓名/学号/班级/备注/教师)" Text="{Binding Query, Mode=TwoWay}"/>
+        <Button Content="刷新" Command="{Binding RefreshCommand}"/>
+        <Button Content="添加记录" Command="{Binding AddCommand}"/>
+      </StackPanel>
+
+      <!-- 筛选条件面板 -->
+      <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Padding="8">
+        <StackPanel Spacing="8">
+          <TextBlock Text="筛选条件" FontWeight="SemiBold" FontSize="14"/>
+          <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="班级:" VerticalAlignment="Center"/>
+              <ComboBox Width="120" ItemsSource="{Binding ClassOptions}" SelectedItem="{Binding SelectedClass, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="开始日期:" VerticalAlignment="Center"/>
+              <DatePicker SelectedDate="{Binding StartDate, Mode=TwoWay}" Width="120"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="结束日期:" VerticalAlignment="Center"/>
+              <DatePicker SelectedDate="{Binding EndDate, Mode=TwoWay}" Width="120"/>
+            </StackPanel>
+            <CheckBox Content="仅显示扣分记录" IsChecked="{Binding ShowNegativeScoresOnly, Mode=TwoWay}"/>
+          </StackPanel>
+          <!-- 时间快捷选择 -->
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="快捷时间:" VerticalAlignment="Center"/>
+            <Button Content="今天" Click="OnSetToday" Padding="8,2"/>
+            <Button Content="昨天" Click="OnSetYesterday" Padding="8,2"/>
+            <Button Content="本周" Click="OnSetThisWeek" Padding="8,2"/>
+            <Button Content="本月" Click="OnSetThisMonth" Padding="8,2"/>
+            <Button Content="清除时间" Click="OnClearDates" Padding="8,2"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Grid ColumnDefinitions="100,100,120,*,80,100,100,Auto" Margin="0,2">
+        <TextBlock Grid.Column="0" Text="日期" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="1" Text="班级" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="2" Text="学号" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="3" Text="姓名" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="4" Text="积分" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="5" Text="教师" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="6" Text="备注" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="7" Text="操作" FontWeight="SemiBold"/>
+      </Grid>
+      
+      <ListBox ItemsSource="{Binding Evaluations}" SelectedItem="{Binding SelectedEvaluation, Mode=TwoWay}" Height="400">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="core:EvaluationEntry">
+            <Grid ColumnDefinitions="100,100,120,*,80,100,100,Auto" Margin="0,2">
+              <Grid.Styles>
+                <Style Selector="TextBox">
+                  <Setter Property="MinWidth" Value="80"/>
+                  <Setter Property="FontSize" Value="12"/>
+                </Style>
+                <Style Selector="TextBlock">
+                  <Setter Property="FontSize" Value="12"/>
+                  <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+              </Grid.Styles>
+              
+              <!-- 非编辑模式 -->
+              <TextBlock Grid.Column="0" Text="{Binding Date, StringFormat=MM-dd HH:mm}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="1" Text="{Binding Class}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="2" Text="{Binding StudentId}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="3" Text="{Binding Name}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="4" Text="{Binding Score}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="5" Text="{Binding TeacherName}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBlock Grid.Column="6" Text="{Binding Remark}" TextTrimming="CharacterEllipsis" MaxWidth="150">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+
+              <!-- 编辑模式 -->
+              <DatePicker Grid.Column="0" SelectedDate="{Binding Date, Mode=TwoWay}" FontSize="10">
+                <DatePicker.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </DatePicker.IsVisible>
+              </DatePicker>
+              <TextBox Grid.Column="1" Text="{Binding Class, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+              <TextBox Grid.Column="2" Text="{Binding StudentId, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+              <TextBox Grid.Column="3" Text="{Binding Name, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+              <TextBox Grid.Column="4" Text="{Binding Score, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+              <TextBox Grid.Column="5" Text="{Binding TeacherName, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+              <TextBox Grid.Column="6" Text="{Binding Remark, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+
+              <!-- 操作按钮 -->
+              <StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="4">
+                <!-- 非编辑状态的按钮 -->
+                <Button Content="✎" FontSize="12" Padding="4,2" Command="{Binding #Root.DataContext.EditCommand}" CommandParameter="{Binding}">
+                  <Button.IsVisible>
+                    <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                      <Binding Path="#Root.DataContext.EditingId"/>
+                      <Binding Path="Id"/>
+                    </MultiBinding>
+                  </Button.IsVisible>
+                </Button>
+                <Button Content="🗑" FontSize="12" Padding="4,2" Command="{Binding #Root.DataContext.DeleteCommand}" CommandParameter="{Binding}">
+                  <Button.IsVisible>
+                    <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                      <Binding Path="#Root.DataContext.EditingId"/>
+                      <Binding Path="Id"/>
+                    </MultiBinding>
+                  </Button.IsVisible>
+                </Button>
+                
+                <!-- 编辑状态的按钮 -->
+                <Button Content="✓" FontSize="12" Padding="4,2" Command="{Binding #Root.DataContext.SaveCommand}" CommandParameter="{Binding}">
+                  <Button.IsVisible>
+                    <MultiBinding Converter="{StaticResource EqualsConverter}">
+                      <Binding Path="#Root.DataContext.EditingId"/>
+                      <Binding Path="Id"/>
+                    </MultiBinding>
+                  </Button.IsVisible>
+                </Button>
+                <Button Content="✗" FontSize="12" Padding="4,2" Command="{Binding #Root.DataContext.CancelCommand}">
+                  <Button.IsVisible>
+                    <MultiBinding Converter="{StaticResource EqualsConverter}">
+                      <Binding Path="#Root.DataContext.EditingId"/>
+                      <Binding Path="Id"/>
+                    </MultiBinding>
+                  </Button.IsVisible>
+                </Button>
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </StackPanel>
+  </Border>
+</UserControl>

@@ -1,0 +1,87 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="ScoreManagerForSchool.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+    x:Name="RootWindow"
+    Icon="/Assets/avalonia-logo.ico"
+    Title="ScoreManagerForSchool">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Margin" Value="2,4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="8,4" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="ListBoxItem:selected">
+            <Setter Property="Background" Value="#FF2D6AE0" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="ListBoxItem:hover">
+            <Setter Property="Background" Value="#332D6AE0" />
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="220, *">
+        <!-- Sidebar: modern list style -->
+        <Border Grid.Column="0" Background="#FF1F1F23" Padding="8">
+            <Grid RowDefinitions="Auto, *">
+                <TextBlock Text="ScoreManager" Foreground="White" FontWeight="SemiBold" Margin="8" Grid.Row="0" FontFamily="Segoe UI"/>
+                <ListBox x:Name="SidebarList" Grid.Row="1" Background="Transparent" BorderThickness="0" Foreground="White"
+                         SelectedItem="{Binding SelectedPage, Mode=TwoWay}" ItemsSource="{Binding SidebarItems}"
+                         VerticalAlignment="Stretch" MinHeight="120" FontFamily="Segoe UI"
+                         Focusable="True" IsHitTestVisible="True" SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Use a transparent Button so clicks always reach and we can handle selection robustly -->
+                <Button Background="Transparent" BorderThickness="0" Padding="8" HorizontalContentAlignment="Left" Click="OnSidebarButtonClick"
+                    HorizontalAlignment="Stretch" Margin="0">
+                                <TextBlock Text="{Binding}" Foreground="White" FontSize="14" VerticalAlignment="Center" />
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="2,2" />
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                        <Style Selector="ListBoxItem:hover">
+                            <Setter Property="Background" Value="#112D6AE0" />
+                        </Style>
+                        <Style Selector="ListBoxItem:selected">
+                            <Setter Property="Background" Value="#223366" />
+                        </Style>
+                    </ListBox.Styles>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Main content -->
+        <Border Grid.Column="1" Padding="12">
+                <StackPanel>
+                <TextBlock Text="{Binding Greeting}" FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="当前页面: {Binding SelectedPage}" Margin="0,8,0,0"/>
+                <ContentControl Name="PageHost"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</Window>

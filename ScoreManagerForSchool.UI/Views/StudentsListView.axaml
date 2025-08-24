@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScoreManagerForSchool.UI.ViewModels"
+             xmlns:core="using:ScoreManagerForSchool.Core.Storage"
+             x:Class="ScoreManagerForSchool.UI.Views.StudentsListView"
+             x:DataType="vm:StudentsViewModel"
+             x:Name="Root">
+
+  <Border Padding="12">
+    <StackPanel Spacing="8">
+      <TextBlock Text="学生列表管理" FontSize="18" FontWeight="Bold"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <!-- 输入框在左，右侧依次为：浏览、预览、保存 -->
+        <TextBox Width="300" Watermark="CSV 路径 (students.csv)" Name="CsvPathBox"/>
+        <Button Content="浏览" Click="OnBrowseCsv" Tag="{Binding #CsvPathBox}"/>
+        <Button Content="预览" Click="OnPreviewImport"/>
+        <Button Content="保存" Click="OnImportAndSave"/>
+        <CheckBox Name="HeaderCheck" IsChecked="True" Content="首行为表头" VerticalAlignment="Center"/>
+  <Button Content="格式说明" Click="OnShowFormatInfo"/>
+        <TextBox Width="240" Watermark="搜索 (姓名/学号/班级)" Text="{Binding Query, Mode=TwoWay}"/>
+      </StackPanel>
+
+      <Grid ColumnDefinitions="120, 140, *" Margin="0,2">
+        <TextBlock Grid.Column="0" Text="班级" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="1" Text="学号" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="2" Text="姓名" FontWeight="SemiBold"/>
+      </Grid>
+      <ListBox ItemsSource="{Binding Students}" SelectedItem="{Binding SelectedStudent, Mode=TwoWay}" Height="360">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="core:Student">
+            <Grid ColumnDefinitions="120, 140, *, Auto" Margin="0,2">
+              <Grid.Styles>
+                <Style Selector="TextBox">
+                  <Setter Property="MinWidth" Value="100"/>
+                </Style>
+              </Grid.Styles>
+              <!-- Row is in edit mode when EditingId == this.Id -->
+              <TextBlock Grid.Column="0" Text="{Binding Class}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBox Grid.Column="0" Text="{Binding Class, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+
+              <TextBlock Grid.Column="1" Text="{Binding Id}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBox Grid.Column="1" Text="{Binding Id, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+
+              <TextBlock Grid.Column="2" Text="{Binding Name}">
+                <TextBlock.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBlock.IsVisible>
+              </TextBlock>
+              <TextBox Grid.Column="2" Text="{Binding Name, Mode=TwoWay}">
+                <TextBox.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </TextBox.IsVisible>
+              </TextBox>
+
+              <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6">
+                <!-- show edit/delete when not editing this row -->
+                <StackPanel.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}" ConverterParameter="Not">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </StackPanel.IsVisible>
+                <Button Content="✎" Command="{Binding #Root.DataContext.BeginEditCommand}" CommandParameter="{Binding}"/>
+                <Button Content="🗑" Command="{Binding #Root.DataContext.DeleteRowCommand}" CommandParameter="{Binding}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6">
+                <!-- show cancel/save when editing this row -->
+                <StackPanel.IsVisible>
+                  <MultiBinding Converter="{StaticResource EqualsConverter}">
+                    <Binding Path="#Root.DataContext.EditingId"/>
+                    <Binding Path="Id"/>
+                  </MultiBinding>
+                </StackPanel.IsVisible>
+                <Button Content="×" Command="{Binding #Root.DataContext.CancelEditCommand}" CommandParameter="{Binding}"/>
+                <Button Content="✔" Command="{Binding #Root.DataContext.SaveRowCommand}" CommandParameter="{Binding}"/>
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+        <Button Content="上一页" Command="{Binding PrevPageCommand}"/>
+        <TextBlock Text="{Binding Page}" VerticalAlignment="Center" Margin="8,0"/>
+        <TextBlock Text="/" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding TotalPages}" VerticalAlignment="Center"/>
+        <Button Content="下一页" Command="{Binding NextPageCommand}" Margin="8,0,0,0"/>
+      </StackPanel>
+
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Content="删除所选" Command="{Binding DeleteCommand}"/>
+        <Button Content="保存所选" Command="{Binding SaveEditCommand}"/>
+        <Button Content="批量更改班级" Click="OnBulkChangeClass"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+
+</UserControl>

@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "EH9wSSEkVmE=",
+  "success": true,
+  "projectFilePath": "D:\\Coding\\Projects\\SMFS\\ScoreManagerForSchool.Cli\\ScoreManagerForSchool.Cli.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\tlnkm\\.nuget\\packages\\exceldatareader\\3.7.0\\exceldatareader.3.7.0.nupkg.sha512",
+    "C:\\Users\\tlnkm\\.nuget\\packages\\npinyin\\0.2.6321.26573\\npinyin.0.2.6321.26573.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0”还原包“NPinyin 0.2.6321.26573”。此包可能与项目不完全兼容。",
+      "projectPath": "D:\\Coding\\Projects\\SMFS\\ScoreManagerForSchool.Cli\\ScoreManagerForSchool.Cli.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\Coding\\Projects\\SMFS\\ScoreManagerForSchool.Cli\\ScoreManagerForSchool.Cli.csproj",
+      "libraryId": "NPinyin",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}

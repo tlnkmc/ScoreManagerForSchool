@@ -1,0 +1,16 @@
+[
+  {
+    "Class": "1\u73ED",
+    "Id": "1001",
+    "Name": "\u5F20\u4E09",
+    "NamePinyin": "zhangsan",
+    "NamePinyinInitials": "zs"
+  },
+  {
+    "Class": "1\u73ED",
+    "Id": "1002",
+    "Name": "\u674E\u56DB",
+    "NamePinyin": "lisi",
+    "NamePinyinInitials": "ls"
+  }
+]
