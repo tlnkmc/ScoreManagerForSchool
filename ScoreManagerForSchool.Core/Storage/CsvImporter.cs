@@ -124,7 +124,7 @@ namespace ScoreManagerForSchool.Core.Storage
         public static List<string[]> ImportScheme(string path)
             => ImportScheme(path, false);
 
-        // 教师 CSV: 工号,姓名,科目,科目组,班级1;班级2;班级3（首行为表头可选）
+        // 教师 CSV: 姓名,科目,科目组,班级1;班级2;班级3（首行为表头可选）
         public static List<Teacher> ImportTeachers(string path, bool firstRowIsHeader = true)
         {
             var list = new List<Teacher>();
@@ -135,20 +135,19 @@ namespace ScoreManagerForSchool.Core.Storage
             for (int i = start; i < rows.Length; i++)
             {
                 var parts = rows[i] ?? Array.Empty<string>();
-                if (parts.Length < 2) continue; // 至少需要工号和姓名
+                if (parts.Length < 1) continue; // 至少需要姓名
                 
                 var teacher = new Teacher
                 {
-                    Id = parts.Length > 0 ? parts[0]?.Trim() : null,
-                    Name = parts.Length > 1 ? parts[1]?.Trim() : null,
-                    Subject = parts.Length > 2 ? parts[2]?.Trim() : null,
-                    SubjectGroup = parts.Length > 3 ? parts[3]?.Trim() : null,
+                    Name = parts.Length > 0 ? parts[0]?.Trim() : null,
+                    Subject = parts.Length > 1 ? parts[1]?.Trim() : null,
+                    SubjectGroup = parts.Length > 2 ? parts[2]?.Trim() : null,
                 };
                 
                 // 解析班级列表（分号分隔）
-                if (parts.Length > 4 && !string.IsNullOrWhiteSpace(parts[4]))
+                if (parts.Length > 3 && !string.IsNullOrWhiteSpace(parts[3]))
                 {
-                    teacher.Classes = parts[4].Split(';', StringSplitOptions.RemoveEmptyEntries)
+                    teacher.Classes = parts[3].Split(';', StringSplitOptions.RemoveEmptyEntries)
                         .Select(c => c.Trim())
                         .Where(c => !string.IsNullOrWhiteSpace(c))
                         .ToList();

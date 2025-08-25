@@ -86,20 +86,17 @@
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="12,8">
-                  <Grid ColumnDefinitions="80,120,100,100,*" ColumnSpacing="16" MinWidth="500">
-                    <TextBlock Text="{Binding Id}" FontSize="12" 
-                               TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Id}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" FontSize="12"
+                  <Grid ColumnDefinitions="120,100,100,*" ColumnSpacing="16" MinWidth="400">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12"
                                TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"
                                VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="2" Text="{Binding Subject}" FontSize="12" 
+                    <TextBlock Grid.Column="1" Text="{Binding Subject}" FontSize="12" 
                                TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Subject}"
                                VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="3" Text="{Binding SubjectGroup}" FontSize="12" 
+                    <TextBlock Grid.Column="2" Text="{Binding SubjectGroup}" FontSize="12"
                                TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SubjectGroup}"
                                VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="4" Text="{Binding ClassesText}" FontSize="11" 
+                    <TextBlock Grid.Column="3" Text="{Binding ClassesText}" FontSize="11"
                                TextWrapping="Wrap" TextTrimming="CharacterEllipsis" 
                                Foreground="Gray" ToolTip.Tip="{Binding ClassesText}"
                                VerticalAlignment="Center" MaxHeight="50"/>
@@ -129,23 +126,20 @@
             </StackPanel>
             
             <StackPanel Grid.Row="1" Spacing="10" IsEnabled="{Binding IsTeacherSelected}">
-              <Grid ColumnDefinitions="80,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
-                <TextBlock Text="工号:" Grid.Row="0" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding SelectedTeacher.Id, Mode=TwoWay}"/>
+              <Grid ColumnDefinitions="80,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+                <TextBlock Text="姓名:" Grid.Row="0" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding SelectedTeacher.Name, Mode=TwoWay}"/>
                 
-                <TextBlock Text="姓名:" Grid.Row="1" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding SelectedTeacher.Name, Mode=TwoWay}"/>
+                <TextBlock Text="科目:" Grid.Row="1" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding SelectedTeacher.Subject, Mode=TwoWay}"/>
                 
-                <TextBlock Text="科目:" Grid.Row="2" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding SelectedTeacher.Subject, Mode=TwoWay}"/>
-                
-                <TextBlock Text="科目组:" Grid.Row="3" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="1" Grid.Row="3"
+                <TextBlock Text="科目组:" Grid.Row="2" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Grid.Row="2"
                           ItemsSource="{Binding SubjectGroupNames}"
                           SelectedItem="{Binding SelectedTeacher.SubjectGroup, Mode=TwoWay}"/>
                 
-                <TextBlock Text="班级:" Grid.Row="4" VerticalAlignment="Top" Margin="0,4,0,0"/>
-                <TextBox Grid.Column="1" Grid.Row="4" 
+                <TextBlock Text="班级:" Grid.Row="3" VerticalAlignment="Top" Margin="0,4,0,0"/>
+                <TextBox Grid.Column="1" Grid.Row="3" 
                          Text="{Binding ClassesText, Mode=TwoWay}" 
                          Watermark="用分号分隔，如：一班;二班"
                          AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>

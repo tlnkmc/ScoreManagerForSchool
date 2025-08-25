@@ -135,10 +135,10 @@ namespace ScoreManagerForSchool.UI.ViewModels
                     return; // 用户取消了选择
                 }
 
-                var template = "工号,姓名,科目,科目组,班级列表\n";
-                template += "T001,张老师,数学,数学,一班;二班\n";
-                template += "T002,李老师,语文,语文,一班\n";
-                template += "T003,王老师,英语,英语,二班;三班\n";
+                var template = "姓名,科目,科目组,班级列表\n";
+                template += "张老师,数学,数学,一班;二班\n";
+                template += "李老师,语文,语文,一班\n";
+                template += "王老师,英语,英语,二班;三班\n";
 
                 await File.WriteAllTextAsync(filePath, template, System.Text.Encoding.UTF8);
                 StatusMessage = "模板文件导出成功";
@@ -153,7 +153,6 @@ namespace ScoreManagerForSchool.UI.ViewModels
         {
             var newTeacher = new Teacher
             {
-                Id = $"T{DateTime.Now:yyyyMMddHHmmss}",
                 Name = "新教师",
                 Subject = "",
                 SubjectGroup = "",

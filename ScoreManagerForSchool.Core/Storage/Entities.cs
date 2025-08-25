@@ -22,7 +22,6 @@ namespace ScoreManagerForSchool.Core.Storage
     // 教师信息
     public class Teacher
     {
-        public string? Id { get; set; }           // 教师工号
         public string? Name { get; set; }         // 教师姓名
         public string? Subject { get; set; }     // 任教科目
         public string? SubjectGroup { get; set; } // 科目组（语文、数学等）

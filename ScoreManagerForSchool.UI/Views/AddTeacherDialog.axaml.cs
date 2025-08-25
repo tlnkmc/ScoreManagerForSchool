@@ -14,9 +14,6 @@ namespace ScoreManagerForSchool.UI.Views
         {
             InitializeComponent();
             
-            // 生成默认工号
-            IdTextBox.Text = $"T{DateTime.Now:yyyyMMddHHmmss}";
-            
             // 设置焦点到姓名输入框
             this.Opened += (s, e) => NameTextBox.Focus();
         }
@@ -33,17 +30,9 @@ namespace ScoreManagerForSchool.UI.Views
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(IdTextBox.Text))
-                {
-                    ShowError("请输入教师工号");
-                    IdTextBox.Focus();
-                    return;
-                }
-
                 // 创建教师对象
                 var teacher = new Teacher
                 {
-                    Id = IdTextBox.Text.Trim(),
                     Name = NameTextBox.Text.Trim(),
                     Subject = SubjectTextBox.Text?.Trim() ?? "",
                     SubjectGroup = SubjectGroupTextBox.Text?.Trim() ?? "",

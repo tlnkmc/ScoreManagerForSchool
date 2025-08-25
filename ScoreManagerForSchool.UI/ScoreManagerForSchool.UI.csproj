@@ -6,13 +6,13 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-  <AssemblyName>scoremgr</AssemblyName>
-  <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
-  <AssemblyVersion>1.0.1.1002</AssemblyVersion>
-  <FileVersion>1.0.1.1002</FileVersion>
-  <InformationalVersion>1.0.1-release</InformationalVersion>
-  <!-- 抑制旧包的兼容性警告 -->
-  <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <AssemblyName>scoremgr</AssemblyName>
+    <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+    <AssemblyVersion>1.0.2.1004</AssemblyVersion>
+    <FileVersion>1.0.2.1004</FileVersion>
+    <InformationalVersion>1.0.2-test</InformationalVersion>
+    <!-- 抑制旧包的兼容性警告 -->
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

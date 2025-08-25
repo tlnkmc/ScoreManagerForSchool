@@ -41,7 +41,6 @@ namespace ScoreManagerForSchool.Core.Storage
                 var matchedTeacher = MatchTeacher(teacherQuery, className);
                 if (matchedTeacher != null)
                 {
-                    evaluation.TeacherId = matchedTeacher.Id;
                     evaluation.TeacherName = matchedTeacher.Name;
                     evaluation.Subject = matchedTeacher.Subject;
                     evaluation.SubjectGroup = matchedTeacher.SubjectGroup;
@@ -138,12 +137,11 @@ namespace ScoreManagerForSchool.Core.Storage
 
             foreach (var newTeacher in teachers)
             {
-                // 检查是否已存在（按工号）
-                var existing = allTeachers.FirstOrDefault(t => t.Id == newTeacher.Id);
+                // 检查是否已存在（按姓名）
+                var existing = allTeachers.FirstOrDefault(t => t.Name == newTeacher.Name);
                 if (existing != null)
                 {
                     // 更新现有教师信息
-                    existing.Name = newTeacher.Name;
                     existing.Subject = newTeacher.Subject;
                     existing.SubjectGroup = newTeacher.SubjectGroup;
                     existing.Classes = newTeacher.Classes;
