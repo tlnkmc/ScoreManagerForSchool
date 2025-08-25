@@ -222,7 +222,7 @@ public partial class App : Application
             string? feed = cfg.UpdateFeedUrl;
             if (!string.Equals(cfg.UpdateSource, "Custom", StringComparison.OrdinalIgnoreCase))
             {
-                var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/releases/ver.txt";
+                var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/ver.txt";
                 feed = Updater.BuildSourceUrl(raw, cfg.UpdateSource);
             }
             if (string.IsNullOrWhiteSpace(feed)) return;

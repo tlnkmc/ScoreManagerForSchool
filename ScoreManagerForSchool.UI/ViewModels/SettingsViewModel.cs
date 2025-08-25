@@ -226,7 +226,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 if (!string.Equals(UpdateSource, "Custom", StringComparison.OrdinalIgnoreCase))
                 {
                     // 固定仓库路径：github/tlnkmc/ScoreManagerForSchool 的 ver.txt
-                    var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/releases/ver.txt";
+                    var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/ver.txt";
                     feed = UI.Services.Updater.BuildSourceUrl(raw, UpdateSource);
                 }
                 
