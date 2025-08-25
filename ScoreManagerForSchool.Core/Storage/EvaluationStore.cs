@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ScoreManagerForSchool.Core.Storage
 {
@@ -11,6 +12,8 @@ namespace ScoreManagerForSchool.Core.Storage
         public string? Class { get; set; }
         public string? StudentId { get; set; }
         public string? Name { get; set; }
+        
+        [JsonConverter(typeof(DateTimeJsonConverter))]
         public DateTime Date { get; set; } = DateTime.Now;
         public string? Item { get; set; }
         public double Score { get; set; }
@@ -25,23 +28,36 @@ namespace ScoreManagerForSchool.Core.Storage
 
     public class EvaluationStore
     {
-        private readonly string _path;
+        private readonly EncryptedDataStore<List<EvaluationEntry>> _store;
+        private readonly string _baseDir;
 
         public EvaluationStore(string baseDir)
         {
+            _baseDir = baseDir;
             Directory.CreateDirectory(baseDir);
-            _path = Path.Combine(baseDir, "evaluations.json");
+            _store = new EncryptedDataStore<List<EvaluationEntry>>(baseDir, "evaluations");
+            
+            // 检查是否需要数据迁移
+            CheckAndMigrateData();
         }
 
         public List<EvaluationEntry> Load()
         {
-            if (!File.Exists(_path)) return new List<EvaluationEntry>();
-            return JsonSerializer.Deserialize<List<EvaluationEntry>>(File.ReadAllText(_path)) ?? new List<EvaluationEntry>();
+            return _store.Load() ?? new List<EvaluationEntry>();
         }
 
         public void Save(IEnumerable<EvaluationEntry> entries)
         {
-            File.WriteAllText(_path, JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true }));
+            _store.Save(new List<EvaluationEntry>(entries));
+        }
+
+        private void CheckAndMigrateData()
+        {
+            var jsonPath = Path.Combine(_baseDir, "evaluations.json");
+            if (File.Exists(jsonPath) && !_store.Exists())
+            {
+                DataMigrationHelper.MigrateData<List<EvaluationEntry>>(_baseDir, "evaluations.json", "evaluations");
+            }
         }
     }
 }

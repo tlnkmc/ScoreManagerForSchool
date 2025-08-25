@@ -19,21 +19,24 @@ namespace ScoreManagerForSchool.Core.Storage
 
     public class AppConfigStore
     {
-        private readonly string _path;
+        private readonly EncryptedDataStore<AppConfig> _store;
+        private readonly string _baseDir;
 
         public AppConfigStore(string baseDir)
         {
+            _baseDir = baseDir;
             Directory.CreateDirectory(baseDir);
-            _path = Path.Combine(baseDir, "appconfig.json");
+            _store = new EncryptedDataStore<AppConfig>(baseDir, "appconfig");
+            
+            // 检查是否需要数据迁移
+            CheckAndMigrateData();
         }
 
         public AppConfig Load()
         {
             try
             {
-                if (!File.Exists(_path)) return new AppConfig();
-                var txt = File.ReadAllText(_path);
-                return JsonSerializer.Deserialize<AppConfig>(txt) ?? new AppConfig();
+                return _store.Load() ?? new AppConfig();
             }
             catch { return new AppConfig(); }
         }
@@ -42,10 +45,18 @@ namespace ScoreManagerForSchool.Core.Storage
         {
             try
             {
-                var txt = JsonSerializer.Serialize(cfg, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_path, txt);
+                _store.Save(cfg);
             }
             catch { }
+        }
+
+        private void CheckAndMigrateData()
+        {
+            var jsonPath = Path.Combine(_baseDir, "appconfig.json");
+            if (File.Exists(jsonPath) && !_store.Exists())
+            {
+                DataMigrationHelper.MigrateData<AppConfig>(_baseDir, "appconfig.json", "appconfig");
+            }
         }
     }
 }

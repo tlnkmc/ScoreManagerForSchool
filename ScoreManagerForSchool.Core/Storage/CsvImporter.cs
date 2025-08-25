@@ -55,8 +55,12 @@ namespace ScoreManagerForSchool.Core.Storage
             } while (reader.NextResult());
             return rows.ToArray();
         }
-        // 学生名单 CSV: 班级,唯一号,姓名
-    public static List<Student> ImportStudents(string path, bool firstRowIsHeader)
+        // 学生名单 CSV: 班级,唯一号,姓名（默认顺序）
+        public static List<Student> ImportStudents(string path, bool firstRowIsHeader)
+            => ImportStudents(path, firstRowIsHeader, 0, 1, 2);
+
+        // 学生名单 CSV: 支持列映射（classCol/idCol/nameCol 为从 0 开始的索引）
+        public static List<Student> ImportStudents(string path, bool firstRowIsHeader, int classCol, int idCol, int nameCol)
         {
             var list = new List<Student>();
             string[][] rows;
@@ -65,12 +69,14 @@ namespace ScoreManagerForSchool.Core.Storage
             for (int i = start; i < rows.Length; i++)
             {
                 var parts = rows[i] ?? Array.Empty<string>();
-                if (parts.Length < 3) continue;
-        var cls = (parts[0] ?? string.Empty).Trim();
-        var id = (parts[1] ?? string.Empty).Trim();
-        var name = (parts[2] ?? string.Empty).Trim();
-        var (fullPy, initPy) = PinyinUtil.MakeKeys(name);
-        list.Add(new Student { Class = cls, Id = id, Name = name, NamePinyin = fullPy, NamePinyinInitials = initPy });
+                int max = Math.Max(classCol, Math.Max(idCol, nameCol));
+                if (parts.Length <= max) continue;
+                var cls = (parts[classCol] ?? string.Empty).Trim();
+                var id = (parts[idCol] ?? string.Empty).Trim();
+                var name = (parts[nameCol] ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(name)) continue;
+                var (fullPy, initPy) = PinyinUtil.MakeKeys(name);
+                list.Add(new Student { Class = cls, Id = id, Name = name, NamePinyin = fullPy, NamePinyinInitials = initPy });
             }
             return list;
         }

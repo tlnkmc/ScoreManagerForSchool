@@ -64,7 +64,20 @@ namespace ScoreManagerForSchool.UI.ViewModels
     public string? ThemeAccent { get => _themeAccent; set { if (_themeAccent != value) { _themeAccent = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ThemeAccent))); } } }
 
     private bool _enableAcrylicEffect;
-    public bool EnableAcrylicEffect { get => _enableAcrylicEffect; set { if (_enableAcrylicEffect != value) { _enableAcrylicEffect = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EnableAcrylicEffect))); } } }
+    public bool EnableAcrylicEffect 
+    { 
+        get => _enableAcrylicEffect; 
+        set 
+        { 
+            if (_enableAcrylicEffect != value) 
+            { 
+                _enableAcrylicEffect = value; 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EnableAcrylicEffect)));
+                // 立即保存配置并应用亚克力效果
+                SaveAcrylicEffectImmediately(value);
+            } 
+        } 
+    }
 
     // 密码修改相关属性
     private string _currentUserPassword = "";
@@ -100,6 +113,31 @@ namespace ScoreManagerForSchool.UI.ViewModels
             ResetFilesCommand = new RelayCommand(_ => Database1Store.DeleteBaseFiles(_baseDir));
             CheckUpdateCommand = new RelayCommand(async _ => await CheckUpdateAsync());
             ChangePasswordCommand = new RelayCommand(_ => ChangePassword());
+            // 订阅属性变化，进行防抖自动保存
+            PropertyChanged += OnAnyPropertyChanged;
+        }
+
+        private System.Threading.CancellationTokenSource? _saveCts;
+        private void OnAnyPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // 忽略仅供输入的密码字段
+            if (e.PropertyName == nameof(CurrentUserPassword) || e.PropertyName == nameof(NewUserPassword) || e.PropertyName == nameof(NewUserPasswordConfirm))
+                return;
+            // 300ms 防抖合并保存
+            try { _saveCts?.Cancel(); } catch { }
+            _saveCts = new System.Threading.CancellationTokenSource();
+            var ct = _saveCts.Token;
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    await System.Threading.Tasks.Task.Delay(300, ct);
+                    if (ct.IsCancellationRequested) return;
+                    Save();
+                }
+                catch (System.OperationCanceledException) { }
+                catch { }
+            });
         }
 
         private void Save()
@@ -123,25 +161,33 @@ namespace ScoreManagerForSchool.UI.ViewModels
             _store.Save(_cfg);
             try
             {
-                Application.Current!.RequestedThemeVariant = englishTheme switch
-                {
-                    "Light" => ThemeVariant.Light,
-                    "Dark" => ThemeVariant.Dark,
-                    _ => ThemeVariant.Default
-                };
-
-                // Apply accent if provided (#RRGGBB)
-                if (!string.IsNullOrWhiteSpace(_cfg.ThemeAccent))
+                // 确保在 UI 线程上执行主题变更
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
                     try
                     {
-                        var color = Avalonia.Media.Color.Parse(_cfg.ThemeAccent);
-                        var res = Application.Current!.Resources;
-                        res["SystemAccentColor"] = color;
-                        res["AccentColor"] = color;
+                        Application.Current!.RequestedThemeVariant = englishTheme switch
+                        {
+                            "Light" => ThemeVariant.Light,
+                            "Dark" => ThemeVariant.Dark,
+                            _ => ThemeVariant.Default
+                        };
+
+                        // Apply accent if provided (#RRGGBB)
+                        if (!string.IsNullOrWhiteSpace(_cfg.ThemeAccent))
+                        {
+                            try
+                            {
+                                var color = Avalonia.Media.Color.Parse(_cfg.ThemeAccent);
+                                var res = Application.Current!.Resources;
+                                res["SystemAccentColor"] = color;
+                                res["AccentColor"] = color;
+                            }
+                            catch { }
+                        }
                     }
                     catch { }
-                }
+                });
             }
             catch { }
 
@@ -158,37 +204,221 @@ namespace ScoreManagerForSchool.UI.ViewModels
             // Apply acrylic effect
             try
             {
-                UpdateAcrylicEffect?.Invoke(_cfg.EnableAcrylicEffect);
+                // 确保在 UI 线程上执行亚克力效果更新
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    try
+                    {
+                        UpdateAcrylicEffect?.Invoke(_cfg.EnableAcrylicEffect);
+                    }
+                    catch { }
+                });
             }
             catch { }
         }
 
         private async System.Threading.Tasks.Task CheckUpdateAsync()
         {
-            // 当非 Custom 源时，我们自动构造 ver.txt 地址
-            string? feed = UpdateFeedUrl;
-            if (!string.Equals(UpdateSource, "Custom", StringComparison.OrdinalIgnoreCase))
-            {
-                // 固定仓库路径：github/tlnkmc/ScoreManagerForSchool 的 ver.txt
-                var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/releases/ver.txt";
-                feed = UI.Services.Updater.BuildSourceUrl(raw, UpdateSource);
-            }
-            if (string.IsNullOrWhiteSpace(feed)) return;
             try
             {
+                // 当非 Custom 源时，我们自动构造 ver.txt 地址
+                string? feed = UpdateFeedUrl;
+                if (!string.Equals(UpdateSource, "Custom", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 固定仓库路径：github/tlnkmc/ScoreManagerForSchool 的 ver.txt
+                    var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/releases/ver.txt";
+                    feed = UI.Services.Updater.BuildSourceUrl(raw, UpdateSource);
+                }
+                
+                if (string.IsNullOrWhiteSpace(feed))
+                {
+                    await ShowUpdateResultDialogAsync("配置错误", "更新源配置不正确");
+                    return;
+                }
+
                 var info = await UI.Services.Updater.CheckAsync(feed!);
-                if (info == null || string.IsNullOrWhiteSpace(info.Version)) return;
+                if (info == null || string.IsNullOrWhiteSpace(info.Version))
+                {
+                    await ShowUpdateResultDialogAsync("检查失败", "无法获取更新信息，请检查网络连接或更新源配置");
+                    return;
+                }
+                
                 var current = UI.Services.Updater.GetCurrentVersion();
-                if (!UI.Services.Updater.IsNewer(current, info.Version!)) return;
+                if (!UI.Services.Updater.IsNewer(current, info.Version!))
+                {
+                    await ShowUpdateResultDialogAsync("已是最新版本", $"当前版本：{current}\n最新版本：{info.Version}\n\n您使用的已经是最新版本");
+                    return;
+                }
+
+                // 有新版本，询问是否下载更新
+                var shouldUpdate = await ShowUpdateAvailableDialogAsync(current, info);
+                if (!shouldUpdate) return;
 
                 // 下载并准备更新包
                 var pkg = await UI.Services.Updater.DownloadAndPrepareUpdateAsync(info, UpdateSource, _baseDir);
-                if (string.IsNullOrWhiteSpace(pkg)) return;
+                if (string.IsNullOrWhiteSpace(pkg))
+                {
+                    await ShowUpdateResultDialogAsync("下载失败", "下载更新包失败，请稍后重试");
+                    return;
+                }
 
-                // 启动更新器 -u --token 并退出当前应用由更新器接管（此处仅启动更新器）
+                // 启动更新器
                 UI.Services.Updater.StartUpdaterU(_baseDir);
             }
-            catch { }
+            catch (System.Exception ex)
+            {
+                await ShowUpdateResultDialogAsync("检查失败", $"更新检查时发生错误：{ex.Message}");
+            }
+        }
+
+        private async System.Threading.Tasks.Task ShowUpdateResultDialogAsync(string title, string message)
+        {
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                var window = Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
+                    ? desktop.MainWindow 
+                    : null;
+                
+                if (window != null)
+                {
+                    var dialog = new Avalonia.Controls.Window
+                    {
+                        Title = title,
+                        Width = 400,
+                        Height = 200,
+                        WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                        CanResize = false
+                    };
+
+                    var panel = new Avalonia.Controls.StackPanel
+                    {
+                        Margin = new Avalonia.Thickness(20),
+                        Spacing = 15
+                    };
+
+                    panel.Children.Add(new Avalonia.Controls.TextBlock
+                    {
+                        Text = message,
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        FontSize = 14
+                    });
+
+                    var buttonPanel = new Avalonia.Controls.StackPanel
+                    {
+                        Orientation = Avalonia.Layout.Orientation.Horizontal,
+                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                        Spacing = 10
+                    };
+
+                    var okButton = new Avalonia.Controls.Button
+                    {
+                        Content = "确定",
+                        Width = 80,
+                        IsDefault = true
+                    };
+                    okButton.Click += (_, __) => dialog.Close();
+
+                    buttonPanel.Children.Add(okButton);
+                    panel.Children.Add(buttonPanel);
+                    dialog.Content = panel;
+
+                    await dialog.ShowDialog(window);
+                }
+            });
+        }
+
+        private async System.Threading.Tasks.Task<bool> ShowUpdateAvailableDialogAsync(string currentVersion, UI.Services.UpdateInfo info)
+        {
+            return await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                var window = Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
+                    ? desktop.MainWindow 
+                    : null;
+                
+                if (window == null) return false;
+
+                var dialog = new Avalonia.Controls.Window
+                {
+                    Title = "发现新版本",
+                    Width = 500,
+                    Height = 300,
+                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                    CanResize = false
+                };
+
+                var panel = new Avalonia.Controls.StackPanel
+                {
+                    Margin = new Avalonia.Thickness(20),
+                    Spacing = 15
+                };
+
+                panel.Children.Add(new Avalonia.Controls.TextBlock
+                {
+                    Text = "发现新版本",
+                    FontSize = 18,
+                    FontWeight = Avalonia.Media.FontWeight.Bold
+                });
+
+                panel.Children.Add(new Avalonia.Controls.TextBlock
+                {
+                    Text = $"当前版本：{currentVersion}\n最新版本：{info.Version}",
+                    FontSize = 14
+                });
+
+                if (!string.IsNullOrWhiteSpace(info.Notes))
+                {
+                    var notesContainer = new Avalonia.Controls.Border
+                    {
+                        Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(245, 245, 245)),
+                        CornerRadius = new Avalonia.CornerRadius(4),
+                        Padding = new Avalonia.Thickness(10),
+                        MaxHeight = 120
+                    };
+
+                    var scrollViewer = new Avalonia.Controls.ScrollViewer();
+                    scrollViewer.Content = new Avalonia.Controls.TextBlock
+                    {
+                        Text = info.Notes,
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        FontSize = 12
+                    };
+
+                    notesContainer.Child = scrollViewer;
+                    panel.Children.Add(notesContainer);
+                }
+
+                var buttonPanel = new Avalonia.Controls.StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    Spacing = 10
+                };
+
+                var updateButton = new Avalonia.Controls.Button
+                {
+                    Content = "立即更新",
+                    Width = 80,
+                    IsDefault = true
+                };
+
+                var cancelButton = new Avalonia.Controls.Button
+                {
+                    Content = "取消",
+                    Width = 80
+                };
+
+                bool result = false;
+                updateButton.Click += (_, __) => { result = true; dialog.Close(); };
+                cancelButton.Click += (_, __) => { result = false; dialog.Close(); };
+
+                buttonPanel.Children.Add(cancelButton);
+                buttonPanel.Children.Add(updateButton);
+                panel.Children.Add(buttonPanel);
+                dialog.Content = panel;
+
+                await dialog.ShowDialog(window);
+                return result;
+            });
         }
 
         private void ChangePassword()
@@ -251,6 +481,27 @@ namespace ScoreManagerForSchool.UI.ViewModels
                     "Dark" => ThemeVariant.Dark,
                     _ => ThemeVariant.Default
                 };
+            }
+            catch { }
+        }
+
+        private void SaveAcrylicEffectImmediately(bool enable)
+        {
+            try
+            {
+                // 更新配置并立即保存
+                _cfg.EnableAcrylicEffect = enable;
+                _store.Save(_cfg);
+                
+                // 确保在 UI 线程上执行亚克力效果更新
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    try
+                    {
+                        UpdateAcrylicEffect?.Invoke(enable);
+                    }
+                    catch { }
+                });
             }
             catch { }
         }

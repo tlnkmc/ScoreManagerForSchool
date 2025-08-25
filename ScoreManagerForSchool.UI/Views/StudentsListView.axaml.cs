@@ -43,23 +43,40 @@ namespace ScoreManagerForSchool.UI.Views
             catch { }
         }
 
-    private async void OnPreviewImport(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void OnPreviewImport(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             try
             {
                 var tb = this.FindControl<TextBox>("CsvPathBox");
-                var chk = this.FindControl<CheckBox>("HeaderCheck");
-                var path = tb?.Text ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(path)) { await ShowMessageAsync("提示", "请先选择 CSV/Excel 文件。"); return; }
-                if (!File.Exists(path)) { await ShowMessageAsync("错误", "文件不存在：" + path); return; }
+                var initPath = tb?.Text ?? string.Empty;
+                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog();
+                if (!string.IsNullOrWhiteSpace(initPath)) dlg.FindControl<TextBox>("PathBox")!.Text = initPath;
+
+                bool ok = false;
+                if (this.VisualRoot is Window win)
+                    ok = await dlg.ShowDialog<bool>(win);
+                else
+                    dlg.Show();
+                if (!ok) return;
+
+                var (path, header, cCol, iCol, nCol) = dlg.GetResult();
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) { await ShowMessageAsync("错误", "无效的文件路径"); return; }
                 var ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
                 if (ext != ".csv" && ext != ".xls" && ext != ".xlsx")
-                {
-                    await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。");
-                    return;
-                }
+                { await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。"); return; }
+
                 if (DataContext is StudentsViewModel vm)
-                    vm.ImportCsv(path, chk?.IsChecked ?? true);
+                {
+                    // reuse VM simple import (default order) if mapping equals default; else map in Core directly
+                    if (cCol == 0 && iCol == 1 && nCol == 2)
+                        vm.ImportCsv(path, header);
+                    else
+                    {
+                        var imported = CsvImporter.ImportStudents(path!, header, cCol, iCol, nCol);
+                        vm.ApplyImported(imported);
+                    }
+                    if (tb != null) tb.Text = path;
+                }
             }
             catch (Exception ex)
             {
@@ -158,19 +175,24 @@ namespace ScoreManagerForSchool.UI.Views
             try
             {
                 var tb = this.FindControl<TextBox>("CsvPathBox");
-                var cb = this.FindControl<CheckBox>("HeaderCheck");
-                var path = tb?.Text ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(path)) { await ShowMessageAsync("提示", "请先选择 CSV/Excel 文件。"); return; }
-                if (!File.Exists(path)) { await ShowMessageAsync("错误", "文件不存在：" + path); return; }
+                var initPath = tb?.Text ?? string.Empty;
+                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog();
+                if (!string.IsNullOrWhiteSpace(initPath)) dlg.FindControl<TextBox>("PathBox")!.Text = initPath;
+
+                bool ok = false;
+                if (this.VisualRoot is Window win)
+                    ok = await dlg.ShowDialog<bool>(win);
+                else
+                    dlg.Show();
+                if (!ok) return;
+
+                var (path, header, cCol, iCol, nCol) = dlg.GetResult();
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) { await ShowMessageAsync("错误", "无效的文件路径"); return; }
                 var ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
                 if (ext != ".csv" && ext != ".xls" && ext != ".xlsx")
-                {
-                    await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。");
-                    return;
-                }
+                { await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。"); return; }
 
-                var header = cb?.IsChecked ?? true;
-                var imported = CsvImporter.ImportStudents(path, header);
+                var imported = CsvImporter.ImportStudents(path!, header, cCol, iCol, nCol);
                 var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "base");
                 if (!ScoreManagerForSchool.UI.Security.AuthManager.Ensure(baseDir)) return;
                 new StudentStore(baseDir).Save(imported);
@@ -178,6 +200,7 @@ namespace ScoreManagerForSchool.UI.Views
                 {
                     vm.Load();
                 }
+                if (tb != null) tb.Text = path;
             }
             catch (Exception ex)
             {

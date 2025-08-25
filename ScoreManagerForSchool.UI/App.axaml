@@ -12,6 +12,11 @@
   
         <Application.Resources>
             <converters:EqualsConverter x:Key="EqualsConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToTextColorConverter x:Key="BoolToTextColorConverter" />
+            <converters:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
+            <converters:StringToColorConverter x:Key="StringToColorConverter" />
+            <converters:StringToBrushConverter x:Key="StringToBrushConverter" />
         </Application.Resources>
         <Application.Styles>
         <FluentTheme />

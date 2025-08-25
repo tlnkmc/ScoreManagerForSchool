@@ -7,23 +7,36 @@ namespace ScoreManagerForSchool.Core.Storage
 {
     public class SchemeStore
     {
-        private readonly string _path;
+        private readonly EncryptedDataStore<List<string[]>> _store;
+        private readonly string _baseDir;
 
         public SchemeStore(string baseDir)
         {
+            _baseDir = baseDir;
             Directory.CreateDirectory(baseDir);
-            _path = Path.Combine(baseDir, "schemes.json");
+            _store = new EncryptedDataStore<List<string[]>>(baseDir, "schemes");
+            
+            // 检查是否需要数据迁移
+            CheckAndMigrateData();
         }
 
         public List<string[]> Load()
         {
-            if (!File.Exists(_path)) return new List<string[]>();
-            return JsonSerializer.Deserialize<List<string[]>>(File.ReadAllText(_path)) ?? new List<string[]>();
+            return _store.Load() ?? new List<string[]>();
         }
 
         public void Save(IEnumerable<string[]> schemes)
         {
-            File.WriteAllText(_path, JsonSerializer.Serialize(schemes, new JsonSerializerOptions { WriteIndented = true }));
+            _store.Save(new List<string[]>(schemes));
+        }
+
+        private void CheckAndMigrateData()
+        {
+            var jsonPath = Path.Combine(_baseDir, "schemes.json");
+            if (File.Exists(jsonPath) && !_store.Exists())
+            {
+                DataMigrationHelper.MigrateData<List<string[]>>(_baseDir, "schemes.json", "schemes");
+            }
         }
     }
 }

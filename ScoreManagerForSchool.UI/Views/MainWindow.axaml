@@ -77,11 +77,10 @@
 
         <!-- Main content -->
         <Border Grid.Column="1" Padding="12">
-                <StackPanel>
-                <TextBlock Text="{Binding Greeting}" FontSize="18" FontWeight="SemiBold"/>
-                <TextBlock Text="当前页面: {Binding SelectedPage}" Margin="0,8,0,0"/>
-                <ContentControl Name="PageHost"/>
-            </StackPanel>
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" Text="{Binding Greeting}" FontSize="18" FontWeight="SemiBold"/>
+                <ContentControl Grid.Row="1" Name="PageHost" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            </Grid>
         </Border>
     </Grid>
 

@@ -10,6 +10,11 @@
     <StackPanel Orientation="Horizontal" Spacing="8">
       <Button Content="刷新" Command="{Binding RefreshCommand}"/>
       <Button Content="导出报表" Command="{Binding ExportCommand}"/>
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <TextBlock Text="关键积分阈值:" VerticalAlignment="Center"/>
+        <TextBox Width="80" Text="{Binding CriticalScoreThreshold}" VerticalAlignment="Center"/>
+        <TextBlock Text="(≤此值将标红)" Foreground="#666" VerticalAlignment="Center" FontSize="11"/>
+      </StackPanel>
     </StackPanel>
 
     <!-- 待处理项（最多显示三个） -->
@@ -59,17 +64,26 @@
         </ListBox.Styles>
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="vm:StatsSummaryItem">
-  <Grid ColumnDefinitions="200,220,*,140,100,Auto" Margin="0,2">
-              <TextBlock Grid.Column="0" Text="{Binding Class}"/>
-              <TextBlock Grid.Column="1" Text="{Binding Id}"/>
-              <TextBlock Grid.Column="2" Text="{Binding Name}"/>
-              <TextBlock Grid.Column="3" Text="{Binding TotalScore}"/>
-      <TextBlock Grid.Column="4" Text="{Binding Count}" HorizontalAlignment="Right"/>
-      <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="6">
-        <Button Content="✎" Click="OnEditSummaryClick"/>
-        <Button Content="🗑" Click="OnDeleteSummaryClick"/>
-      </StackPanel>
-            </Grid>
+            <Border Background="{Binding IsCritical, Converter={StaticResource BoolToColorConverter}}" 
+                    CornerRadius="4" Padding="4,2">
+              <Grid ColumnDefinitions="200,220,*,140,100,Auto" Margin="0,2">
+                <TextBlock Grid.Column="0" Text="{Binding Class}" 
+                           Foreground="{Binding IsCritical, Converter={StaticResource BoolToTextColorConverter}}"/>
+                <TextBlock Grid.Column="1" Text="{Binding Id}" 
+                           Foreground="{Binding IsCritical, Converter={StaticResource BoolToTextColorConverter}}"/>
+                <TextBlock Grid.Column="2" Text="{Binding Name}" 
+                           Foreground="{Binding IsCritical, Converter={StaticResource BoolToTextColorConverter}}"/>
+                <TextBlock Grid.Column="3" Text="{Binding TotalScore}" 
+                           Foreground="{Binding IsCritical, Converter={StaticResource BoolToTextColorConverter}}"
+                           FontWeight="{Binding IsCritical, Converter={StaticResource BoolToFontWeightConverter}}"/>
+                <TextBlock Grid.Column="4" Text="{Binding Count}" HorizontalAlignment="Right" 
+                           Foreground="{Binding IsCritical, Converter={StaticResource BoolToTextColorConverter}}"/>
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="6">
+                  <Button Content="✎" Click="OnEditSummaryClick"/>
+                  <Button Content="🗑" Click="OnDeleteSummaryClick"/>
+                </StackPanel>
+              </Grid>
+            </Border>
           </DataTemplate>
         </ListBox.ItemTemplate>
   </ListBox>

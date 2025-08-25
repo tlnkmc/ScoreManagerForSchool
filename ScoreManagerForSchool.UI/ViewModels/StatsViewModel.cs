@@ -18,6 +18,8 @@ namespace ScoreManagerForSchool.UI.ViewModels
         public string? Name { get; set; }
         public double TotalScore { get; set; }
         public int Count { get; set; }
+        public bool IsCritical { get; set; }
+        public CriticalScoreLevel? CriticalLevel { get; set; }
     }
 
     public enum SortKey { Score, Class, Id, Name }
@@ -29,12 +31,28 @@ namespace ScoreManagerForSchool.UI.ViewModels
         private readonly string _baseDir;
         private List<EvaluationEntry> _allEvaluations = new();
         private List<Student> _allStudents = new();
+        private double _criticalScoreThreshold = -10.0; // 默认关键积分阈值
 
         public ObservableCollection<EvaluationEntry> PendingTop { get; } = new();
         public ObservableCollection<StatsSummaryItem> Summary { get; } = new();
+        public ObservableCollection<StatsSummaryItem> CriticalStudents { get; } = new();
 
         public SortKey SortBy { get; private set; } = SortKey.Score;
         public bool SortDesc { get; private set; } = true;
+
+        public double CriticalScoreThreshold 
+        { 
+            get => _criticalScoreThreshold;
+            set
+            {
+                if (_criticalScoreThreshold != value)
+                {
+                    _criticalScoreThreshold = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CriticalScoreThreshold)));
+                    ApplySummary(); // 重新计算汇总
+                }
+            }
+        }
 
         public ICommand RefreshCommand { get; }
         public ICommand ExportCommand { get; }
@@ -43,6 +61,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
         public ICommand SortCommand { get; }
         public ICommand EditEvaluationCommand { get; }
         public ICommand DeleteEvaluationCommand { get; }
+        public ICommand SetCriticalThresholdCommand { get; }
 
         public StatsViewModel(string? baseDir = null)
         {
@@ -54,6 +73,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
             SortCommand = new RelayCommand(p => ToggleSort(p as string));
             EditEvaluationCommand = new RelayCommand(p => EditEvaluation(p as EvaluationEntry));
             DeleteEvaluationCommand = new RelayCommand(p => DeleteEvaluation(p as EvaluationEntry));
+            SetCriticalThresholdCommand = new RelayCommand(p => SetCriticalThreshold(p as string));
             Load();
         }
 
@@ -106,13 +126,20 @@ namespace ScoreManagerForSchool.UI.ViewModels
                     e.Class
                 });
 
-            var items = groups.Select(g => new StatsSummaryItem
+            var items = groups.Select(g => 
             {
-                Class = g.Key.Class,
-                Id = g.Key.Id,
-                Name = g.Key.Name,
-                TotalScore = g.Sum(x => x.Score),
-                Count = g.Count(),
+                var totalScore = g.Sum(x => x.Score);
+                var criticalLevel = CriticalScoreLevels.GetCriticalLevel(totalScore);
+                return new StatsSummaryItem
+                {
+                    Class = g.Key.Class,
+                    Id = g.Key.Id,
+                    Name = g.Key.Name,
+                    TotalScore = totalScore,
+                    Count = g.Count(),
+                    IsCritical = criticalLevel != null,
+                    CriticalLevel = criticalLevel
+                };
             });
 
             // Apply selected sort with stable tie-breakers
@@ -140,6 +167,12 @@ namespace ScoreManagerForSchool.UI.ViewModels
 
             foreach (var it in ordered)
                 Summary.Add(it);
+
+            // 更新关键积分学生列表
+            CriticalStudents.Clear();
+            var criticalStudents = ordered.Where(item => item.IsCritical).Take(10); // 最多显示10个关键学生
+            foreach (var critical in criticalStudents)
+                CriticalStudents.Add(critical);
         }
 
         private string? LookupId(string? name, string? klass)
@@ -310,6 +343,14 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 s = '"' + s.Replace("\"", "\"\"") + '"';
             }
             return s;
+        }
+
+        private void SetCriticalThreshold(string? thresholdStr)
+        {
+            if (double.TryParse(thresholdStr, out double threshold))
+            {
+                CriticalScoreThreshold = threshold;
+            }
         }
     }
 }

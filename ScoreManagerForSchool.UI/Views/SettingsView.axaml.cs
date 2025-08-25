@@ -64,7 +64,6 @@ namespace ScoreManagerForSchool.UI.Views
 
             // delete files
             ScoreManagerForSchool.Core.Storage.Database1Store.DeleteBaseFiles(baseDir);
-            if (this.DataContext is SettingsViewModel vm) vm.GetType().GetMethod("Save", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(vm, null);
         }
     }
 }

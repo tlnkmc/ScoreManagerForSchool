@@ -43,6 +43,10 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 NextCommand = new RelayCommand(async _ => await NextAsync());
                 SkipCommand = new RelayCommand(_ => { Advance(); AutoFillCurrent(); });
                 AddToPendingCommand = new RelayCommand(_ => AddToPending());
+                ProcessPendingCommand = new RelayCommand(p => ProcessPending(p as EvaluationEntry));
+                DeletePendingCommand = new RelayCommand(p => DeletePending(p as EvaluationEntry));
+                
+                LoadPendingItems();
                 
                 Logger.LogInfo($"InfoEntryViewModel 初始化完成，加载 {_students.Count} 名学生", "InfoEntryViewModel");
             }
@@ -90,11 +94,14 @@ namespace ScoreManagerForSchool.UI.ViewModels
         private string? _matchedTeacherInfo;
         public string? MatchedTeacherInfo { get => _matchedTeacherInfo; set { _matchedTeacherInfo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MatchedTeacherInfo))); } }
 
-    public ObservableCollection<string> ClassOptions { get; }
+        public ObservableCollection<string> ClassOptions { get; }
+        public ObservableCollection<EvaluationEntry> PendingItems { get; } = new();
 
         public ICommand NextCommand { get; }
         public ICommand SkipCommand { get; }
         public ICommand AddToPendingCommand { get; }
+        public ICommand ProcessPendingCommand { get; }
+        public ICommand DeletePendingCommand { get; }
 
         private void ParseLines()
         {
@@ -518,6 +525,98 @@ namespace ScoreManagerForSchool.UI.ViewModels
             {
                 Logger.LogError("NextAsync 执行失败", "InfoEntryViewModel", ex);
                 ErrorHandler.HandleError(ex, "录入积分信息时发生错误", "InfoEntryViewModel.NextAsync");
+            }
+        }
+
+        private void LoadPendingItems()
+        {
+            try
+            {
+                PendingItems.Clear();
+                var store = new EvaluationStore(_baseDir);
+                var allEvaluations = store.Load();
+                
+                // 加载待处理项（没有姓名的记录）
+                var pendingItems = allEvaluations
+                    .Where(e => string.IsNullOrWhiteSpace(e.Name))
+                    .OrderByDescending(e => e.Date)
+                    .ToList();
+                
+                foreach (var item in pendingItems)
+                {
+                    PendingItems.Add(item);
+                }
+                
+                Logger.LogInfo($"加载了 {PendingItems.Count} 个待处理项", "InfoEntryViewModel");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("加载待处理项失败", "InfoEntryViewModel", ex);
+                ErrorHandler.HandleError(ex, "加载待处理项时发生错误", "InfoEntryViewModel.LoadPendingItems");
+            }
+        }
+
+        private void ProcessPending(EvaluationEntry? entry)
+        {
+            if (entry == null) return;
+            
+            try
+            {
+                // 将待处理项添加到多行粘贴框的最后一行
+                var currentText = PasteText ?? string.Empty;
+                var newLine = entry.Remark ?? string.Empty;
+                
+                if (string.IsNullOrWhiteSpace(currentText))
+                {
+                    PasteText = newLine;
+                }
+                else
+                {
+                    PasteText = currentText.TrimEnd() + Environment.NewLine + newLine;
+                }
+                
+                // 重新解析行
+                ParseLines();
+                
+                // 从待处理列表中移除
+                PendingItems.Remove(entry);
+                
+                // 从数据库中删除
+                var store = new EvaluationStore(_baseDir);
+                var allEvaluations = store.Load();
+                allEvaluations.RemoveAll(e => e.Id == entry.Id);
+                store.Save(allEvaluations);
+                
+                Logger.LogInfo($"处理待处理项: {entry.Remark}", "InfoEntryViewModel");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("处理待处理项失败", "InfoEntryViewModel", ex);
+                ErrorHandler.HandleError(ex, "处理待处理项时发生错误", "InfoEntryViewModel.ProcessPending");
+            }
+        }
+
+        private void DeletePending(EvaluationEntry? entry)
+        {
+            if (entry == null) return;
+            
+            try
+            {
+                // 从待处理列表中移除
+                PendingItems.Remove(entry);
+                
+                // 从数据库中删除
+                var store = new EvaluationStore(_baseDir);
+                var allEvaluations = store.Load();
+                allEvaluations.RemoveAll(e => e.Id == entry.Id);
+                store.Save(allEvaluations);
+                
+                Logger.LogInfo($"删除待处理项: {entry.Remark}", "InfoEntryViewModel");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("删除待处理项失败", "InfoEntryViewModel", ex);
+                ErrorHandler.HandleError(ex, "删除待处理项时发生错误", "InfoEntryViewModel.DeletePending");
             }
         }
     }

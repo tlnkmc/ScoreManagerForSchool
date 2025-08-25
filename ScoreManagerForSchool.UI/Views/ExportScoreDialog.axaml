@@ -23,16 +23,220 @@
       
       <!-- 自定义日期选择器 -->
       <Grid ColumnDefinitions="*,Auto,*" IsVisible="{Binding IsCustomDateVisible}" Margin="0,8">
-        <StackPanel Grid.Column="0" Spacing="4">
-          <TextBlock Text="开始日期"/>
-          <DatePicker SelectedDate="{Binding StartDate}"/>
+        <StackPanel Grid.Column="0" Spacing="6">
+          <TextBlock Text="开始日期" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+          <Button Name="StartDateButton" 
+                  Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                  Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                  BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                  BorderThickness="1"
+                  CornerRadius="6"
+                  Padding="12,6"
+                  Width="160"
+                  HorizontalContentAlignment="Center"
+                  Click="OnStartDateButtonClick">
+            <TextBlock Text="{Binding StartDate, StringFormat={}{0:yyyy-MM-dd}, TargetNullValue=选择日期}"/>
+            <Button.Styles>
+              <Style Selector="Button:pointerover">
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundAccentBrush}"/>
+              </Style>
+              <Style Selector="Button:pressed">
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumBrush}"/>
+              </Style>
+            </Button.Styles>
+          </Button>
+          <Popup Name="StartDatePopup" 
+                 IsLightDismissEnabled="True" 
+                 PlacementTarget="{Binding ElementName=StartDateButton}"
+                 Placement="Bottom"
+                 HorizontalOffset="-10"
+                 VerticalOffset="4">
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" 
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Padding="16">
+              <Border.Effect>
+                <DropShadowEffect OffsetX="0" OffsetY="4" BlurRadius="16" Opacity="0.25"/>
+              </Border.Effect>
+              <Calendar Name="StartDateCalendar" 
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}">
+                <Calendar.Styles>
+                  <!-- 日期按钮样式 -->
+                  <Style Selector="CalendarDayButton">
+                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="CornerRadius" Value="999"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                  </Style>
+                  
+                  <!-- 悬浮效果 -->
+                  <Style Selector="CalendarDayButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundAccentBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                  </Style>
+                  
+                  <!-- 选中状态 -->
+                  <Style Selector="CalendarDayButton:selected">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlAccentBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundChromeWhiteBrush}"/>
+                  </Style>
+                  
+                  <!-- 选中+悬浮状态 -->
+                  <Style Selector="CalendarDayButton:selected:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlAccentDark1Brush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundChromeWhiteBrush}"/>
+                  </Style>
+                  
+                  <!-- 今天的特殊样式 -->
+                  <Style Selector="CalendarDayButton:today">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemControlAccentBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                  </Style>
+                  
+                  <!-- 月份/年份标题样式 -->
+                  <Style Selector="CalendarButton">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="CornerRadius" Value="4"/>
+                    <Setter Property="Padding" Value="6,3"/>
+                  </Style>
+                  
+                  <Style Selector="CalendarButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                  </Style>
+                  
+                  <!-- 导航按钮样式 -->
+                  <Style Selector="RepeatButton">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                  </Style>
+                  
+                  <Style Selector="RepeatButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                  </Style>
+                </Calendar.Styles>
+              </Calendar>
+            </Border>
+          </Popup>
         </StackPanel>
         
-        <TextBlock Grid.Column="1" Text="至" VerticalAlignment="Center" Margin="8"/>
+        <TextBlock Grid.Column="1" Text="至" VerticalAlignment="Center" Margin="8" FontWeight="Medium" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
         
-        <StackPanel Grid.Column="2" Spacing="4">
-          <TextBlock Text="结束日期"/>
-          <DatePicker SelectedDate="{Binding EndDate}"/>
+        <StackPanel Grid.Column="2" Spacing="6">
+          <TextBlock Text="结束日期" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+          <Button Name="EndDateButton" 
+                  Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                  Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                  BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                  BorderThickness="1"
+                  CornerRadius="6"
+                  Padding="12,6"
+                  Width="160"
+                  HorizontalContentAlignment="Center"
+                  Click="OnEndDateButtonClick">
+            <TextBlock Text="{Binding EndDate, StringFormat={}{0:yyyy-MM-dd}, TargetNullValue=选择日期}"/>
+            <Button.Styles>
+              <Style Selector="Button:pointerover">
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundAccentBrush}"/>
+              </Style>
+              <Style Selector="Button:pressed">
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumBrush}"/>
+              </Style>
+            </Button.Styles>
+          </Button>
+          <Popup Name="EndDatePopup" 
+                 IsLightDismissEnabled="True" 
+                 PlacementTarget="{Binding ElementName=EndDateButton}"
+                 Placement="Bottom"
+                 HorizontalOffset="-10"
+                 VerticalOffset="4">
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" 
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Padding="16">
+              <Border.Effect>
+                <DropShadowEffect OffsetX="0" OffsetY="4" BlurRadius="16" Opacity="0.25"/>
+              </Border.Effect>
+              <Calendar Name="EndDateCalendar" 
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}">
+                <Calendar.Styles>
+                  <!-- 日期按钮样式 -->
+                  <Style Selector="CalendarDayButton">
+                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="CornerRadius" Value="999"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                  </Style>
+                  
+                  <!-- 悬浮效果 -->
+                  <Style Selector="CalendarDayButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundAccentBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                  </Style>
+                  
+                  <!-- 选中状态 -->
+                  <Style Selector="CalendarDayButton:selected">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlAccentBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundChromeWhiteBrush}"/>
+                  </Style>
+                  
+                  <!-- 选中+悬浮状态 -->
+                  <Style Selector="CalendarDayButton:selected:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlAccentDark1Brush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundChromeWhiteBrush}"/>
+                  </Style>
+                  
+                  <!-- 今天的特殊样式 -->
+                  <Style Selector="CalendarDayButton:today">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SystemControlAccentBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                  </Style>
+                  
+                  <!-- 月份/年份标题样式 -->
+                  <Style Selector="CalendarButton">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="CornerRadius" Value="4"/>
+                    <Setter Property="Padding" Value="6,3"/>
+                  </Style>
+                  
+                  <Style Selector="CalendarButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                  </Style>
+                  
+                  <!-- 导航按钮样式 -->
+                  <Style Selector="RepeatButton">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                  </Style>
+                  
+                  <Style Selector="RepeatButton:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListMediumBrush}"/>
+                  </Style>
+                </Calendar.Styles>
+              </Calendar>
+            </Border>
+          </Popup>
         </StackPanel>
       </Grid>
       

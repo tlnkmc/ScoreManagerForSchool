@@ -22,6 +22,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
 
         public ObservableCollection<Teacher> Teachers { get; } = new();
         public ObservableCollection<SubjectGroup> SubjectGroups { get; } = new();
+    public ObservableCollection<string> SubjectGroupNames { get; } = new();
 
         public ICommand ImportTeachersCommand { get; }
         public ICommand ExportTemplateCommand { get; }
@@ -57,14 +58,25 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 Teachers.Add(teacher);
             }
 
+            ReloadSubjectGroups();
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Teachers)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SubjectGroups)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SubjectGroupNames)));
+        }
+
+        public void ReloadSubjectGroups()
+        {
             SubjectGroups.Clear();
             foreach (var group in _subjectGroupStore.Load())
             {
                 SubjectGroups.Add(group);
             }
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Teachers)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SubjectGroups)));
+            SubjectGroupNames.Clear();
+            foreach (var name in SubjectGroups.Select(g => g.Name).Where(n => !string.IsNullOrWhiteSpace(n)))
+            {
+                SubjectGroupNames.Add(name!);
+            }
         }
 
         private async Task ImportTeachersAsync()
@@ -159,7 +171,17 @@ namespace ScoreManagerForSchool.UI.ViewModels
             SelectedTeacher = newTeacher;
         }
 
-        private void DeleteTeacher(Teacher? teacher)
+        public void AddTeacher(Teacher teacher)
+        {
+            if (teacher != null)
+            {
+                Teachers.Add(teacher);
+                SelectedTeacher = teacher;
+                StatusMessage = "教师添加成功";
+            }
+        }
+
+        public void DeleteTeacher(Teacher? teacher)
         {
             if (teacher != null && Teachers.Contains(teacher))
             {

@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog"
+        Title="导入预览与映射" Width="780" Height="520">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
+    <!-- Top controls: file, header, mapping -->
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+      <TextBox x:Name="PathBox" Watermark="CSV/XLS/XLSX 路径"/>
+      <Button Grid.Column="1" Content="浏览" x:Name="BrowseBtn"/>
+      <CheckBox Grid.Column="2" x:Name="HeaderCheck" IsChecked="True" Content="首行为表头" VerticalAlignment="Center"/>
+      <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+        <TextBlock Text="班级列"/>
+        <ComboBox x:Name="ClassColBox" Width="90"/>
+      </StackPanel>
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+        <TextBlock Text="学号列"/>
+        <ComboBox x:Name="IdColBox" Width="90"/>
+      </StackPanel>
+    </Grid>
+
+    <!-- Preview grid -->
+    <DataGrid Grid.Row="1" x:Name="PreviewGrid" AutoGenerateColumns="True" IsReadOnly="True"/>
+
+    <!-- Bottom buttons -->
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <TextBlock VerticalAlignment="Center" Text="姓名列"/>
+      <ComboBox x:Name="NameColBox" Width="90"/>
+      <Button Content="加载预览" x:Name="LoadBtn"/>
+      <Button Content="确定" x:Name="OkBtn"/>
+      <Button Content="取消" x:Name="CancelBtn"/>
+    </StackPanel>
+  </Grid>
+</Window>

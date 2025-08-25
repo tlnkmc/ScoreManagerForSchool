@@ -126,26 +126,306 @@ namespace ScoreManagerForSchool.Core.Security
         // Decrypt Base64 cipher using keyBytes
         public static string DecryptFromBase64(string cipherBase64, byte[] keyBytes)
         {
-            var data = Convert.FromBase64String(cipherBase64);
-            var key = NormalizeKeyBytes(keyBytes, 32);
+            if (string.IsNullOrEmpty(cipherBase64))
+                throw new ArgumentException("密文不能为空", nameof(cipherBase64));
+            
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw new ArgumentException("密钥不能为空", nameof(keyBytes));
+
+            byte[]? data = null;
+            byte[]? key = null;
+            
             try
             {
+                data = Convert.FromBase64String(cipherBase64);
+                
+                // 详细的数据验证
+                if (data.Length < 16)
+                    throw new ArgumentException($"加密数据格式无效：长度不足 ({data.Length} < 16 字节)");
+                
+                // 检查数据长度是否合理（应该是16的倍数+16字节IV）
+                if ((data.Length - 16) % 16 != 0)
+                {
+                    throw new ArgumentException($"加密数据格式可能无效：数据长度 {data.Length} 不符合AES块大小要求");
+                }
+                
+                key = NormalizeKeyBytes(keyBytes, 32);
+                
                 using var aes = Aes.Create();
                 aes.Key = key;
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
+                
                 using var ms = new MemoryStream(data);
                 var iv = new byte[16];
-                ms.Read(iv, 0, iv.Length);
+                var ivBytesRead = ms.Read(iv, 0, iv.Length);
+                
+                if (ivBytesRead != 16)
+                    throw new ArgumentException("加密数据格式无效：无法读取IV");
+                
                 aes.IV = iv;
+                
+                // 检查是否还有加密数据
+                var remainingDataLength = ms.Length - ms.Position;
+                if (remainingDataLength <= 0)
+                    throw new ArgumentException("加密数据格式无效：没有加密内容");
+                
+                if (remainingDataLength % 16 != 0)
+                    throw new ArgumentException($"加密数据格式无效：加密内容长度 {remainingDataLength} 不是16的倍数");
+                
                 using var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read);
                 using var sr = new StreamReader(cs, Encoding.UTF8);
-                var result = sr.ReadToEnd();
-                return result;
+                
+                try
+                {
+                    var result = sr.ReadToEnd();
+                    
+                    // 验证解密结果不为空
+                    if (string.IsNullOrEmpty(result))
+                        throw new CryptographicException("解密结果为空，可能是密钥错误");
+                    
+                    return result;
+                }
+                catch (CryptographicException ex) when (ex.Message.Contains("Padding is invalid"))
+                {
+                    throw new CryptographicException(
+                        "解密失败：填充无效。可能原因：\n" +
+                        "1. 密钥不正确\n" +
+                        "2. 加密数据已损坏\n" +
+                        "3. 数据格式不匹配\n" +
+                        $"数据长度: {data.Length} 字节", ex);
+                }
+                catch (CryptographicException ex)
+                {
+                    throw new CryptographicException($"解密失败：{ex.Message}。数据长度: {data.Length} 字节", ex);
+                }
+                catch (Exception ex)
+                {
+                    throw new CryptographicException($"解密过程中发生未知错误：{ex.Message}", ex);
+                }
+            }
+            catch (FormatException ex)
+            {
+                throw new ArgumentException("Base64格式无效", nameof(cipherBase64), ex);
             }
             finally
             {
                 if (key != null) Array.Clear(key, 0, key.Length);
+                if (data != null) Array.Clear(data, 0, data.Length);
+            }
+        }
+
+        /// <summary>
+        /// 安全解密方法，包含错误恢复和诊断功能
+        /// </summary>
+        public static string SafeDecryptFromBase64(string cipherBase64, byte[] keyBytes, bool allowFallback = true)
+        {
+            if (string.IsNullOrEmpty(cipherBase64))
+                throw new ArgumentException("密文不能为空", nameof(cipherBase64));
+            
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw new ArgumentException("密钥不能为空", nameof(keyBytes));
+
+            // 首先尝试正常解密
+            try
+            {
+                return DecryptFromBase64(cipherBase64, keyBytes);
+            }
+            catch (CryptographicException ex) when (allowFallback)
+            {
+                // 记录详细错误信息
+                var diagnosis = DiagnoseEncryptedData(cipherBase64);
+                System.Diagnostics.Debug.WriteLine($"解密失败，诊断信息：\n{diagnosis}");
+                System.Diagnostics.Debug.WriteLine($"错误详情：{ex.Message}");
+                
+                // 尝试替代解密方法
+                return TryAlternativeDecryption(cipherBase64, keyBytes);
+            }
+        }
+
+        /// <summary>
+        /// 尝试替代的解密方法
+        /// </summary>
+        private static string TryAlternativeDecryption(string cipherBase64, byte[] keyBytes)
+        {
+            byte[]? data = null;
+            byte[]? key = null;
+            
+            try
+            {
+                data = Convert.FromBase64String(cipherBase64);
+                key = NormalizeKeyBytes(keyBytes, 32);
+                
+                // 尝试不同的解密策略
+                var strategies = new[]
+                {
+                    () => TryDecryptWithPadding(data, key, PaddingMode.PKCS7),
+                    () => TryDecryptWithPadding(data, key, PaddingMode.Zeros),
+                    () => TryDecryptWithPadding(data, key, PaddingMode.None),
+                    () => TryLegacyDecryption(data, key),
+                    () => TryRawDecryption(data, key)
+                };
+
+                foreach (var strategy in strategies)
+                {
+                    try
+                    {
+                        var result = strategy();
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"使用替代策略成功解密");
+                            return result;
+                        }
+                    }
+                    catch
+                    {
+                        // 继续尝试下一个策略
+                    }
+                }
+                
+                throw new CryptographicException("所有解密策略都失败了");
+            }
+            finally
+            {
+                if (key != null) Array.Clear(key, 0, key.Length);
+                if (data != null) Array.Clear(data, 0, data.Length);
+            }
+        }
+
+        /// <summary>
+        /// 使用指定填充模式尝试解密
+        /// </summary>
+        private static string TryDecryptWithPadding(byte[] data, byte[] key, PaddingMode padding)
+        {
+            if (data.Length < 16) return string.Empty;
+            
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = padding;
+            
+            using var ms = new MemoryStream(data);
+            var iv = new byte[16];
+            ms.Read(iv, 0, 16);
+            aes.IV = iv;
+            
+            var remainingData = new byte[ms.Length - ms.Position];
+            ms.Read(remainingData, 0, remainingData.Length);
+            
+            if (remainingData.Length == 0) return string.Empty;
+            
+            using var cs = new CryptoStream(new MemoryStream(remainingData), aes.CreateDecryptor(), CryptoStreamMode.Read);
+            using var sr = new StreamReader(cs, Encoding.UTF8);
+            
+            var result = sr.ReadToEnd();
+            
+            // 验证结果是否合理
+            if (IsValidDecryptionResult(result))
+                return result;
+            
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 尝试旧版本兼容的解密方法
+        /// </summary>
+        private static string TryLegacyDecryption(byte[] data, byte[] key)
+        {
+            // 实现向后兼容的解密逻辑
+            // 这里可以添加对旧版本加密格式的支持
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 尝试原始数据解密（无IV）
+        /// </summary>
+        private static string TryRawDecryption(byte[] data, byte[] key)
+        {
+            if (data.Length < 16) return string.Empty;
+            
+            try
+            {
+                using var aes = Aes.Create();
+                aes.Key = key;
+                aes.Mode = CipherMode.ECB; // 尝试ECB模式
+                aes.Padding = PaddingMode.PKCS7;
+                
+                using var cs = new CryptoStream(new MemoryStream(data), aes.CreateDecryptor(), CryptoStreamMode.Read);
+                using var sr = new StreamReader(cs, Encoding.UTF8);
+                
+                var result = sr.ReadToEnd();
+                return IsValidDecryptionResult(result) ? result : string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 验证解密结果是否合理
+        /// </summary>
+        private static bool IsValidDecryptionResult(string result)
+        {
+            if (string.IsNullOrEmpty(result)) return false;
+            
+            // 检查是否包含合理的字符
+            var validChars = 0;
+            var totalChars = result.Length;
+            
+            foreach (char c in result)
+            {
+                if (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c) || c > 127)
+                {
+                    validChars++;
+                }
+            }
+            
+            // 如果超过80%的字符是合理的，认为解密成功
+            return (double)validChars / totalChars > 0.8;
+        }
+        public static string DiagnoseEncryptedData(string cipherBase64)
+        {
+            if (string.IsNullOrEmpty(cipherBase64))
+                return "❌ 密文为空";
+
+            try
+            {
+                var data = Convert.FromBase64String(cipherBase64);
+                var result = $"✅ Base64解码成功\n";
+                result += $"📊 数据长度: {data.Length} 字节\n";
+                
+                if (data.Length < 16)
+                {
+                    result += "❌ 数据长度不足（需要至少16字节IV）\n";
+                    return result;
+                }
+                
+                result += $"📦 IV长度: 16 字节\n";
+                result += $"🔐 加密内容长度: {data.Length - 16} 字节\n";
+                
+                var encryptedContentLength = data.Length - 16;
+                if (encryptedContentLength % 16 == 0)
+                {
+                    result += "✅ 加密内容长度符合AES块大小要求\n";
+                }
+                else
+                {
+                    result += $"⚠️ 加密内容长度不是16的倍数（余数: {encryptedContentLength % 16}）\n";
+                }
+                
+                // 显示IV的前4个字节（用于调试）
+                result += $"🔑 IV前缀: {Convert.ToHexString(data[0..Math.Min(4, data.Length)])}...\n";
+                
+                return result;
+            }
+            catch (FormatException)
+            {
+                return "❌ Base64格式无效";
+            }
+            catch (Exception ex)
+            {
+                return $"❌ 诊断失败: {ex.Message}";
             }
         }
     }

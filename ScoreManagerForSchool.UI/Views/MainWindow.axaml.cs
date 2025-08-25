@@ -46,6 +46,12 @@ namespace ScoreManagerForSchool.UI.Views
                 // 初始化亚克力效果设置
                 InitializeAcrylicEffect();
                 
+                // 监听主题变化
+                if (Avalonia.Application.Current != null)
+                {
+                    Avalonia.Application.Current.ActualThemeVariantChanged += OnThemeChanged;
+                }
+                
                 this.Opened += MainWindow_Opened;
             }
             catch (Exception ex)
@@ -269,14 +275,50 @@ namespace ScoreManagerForSchool.UI.Views
                 }
                 else
                 {
-                    // 禁用亚克力效果，使用默认背景
+                    // 禁用亚克力效果，使用主题背景色
                     this.TransparencyLevelHint = new[] { Avalonia.Controls.WindowTransparencyLevel.None };
-                    this.Background = null; // 使用主题默认背景
+                    
+                    // 根据当前主题变体设置适当的背景色
+                    var themeVariant = Avalonia.Application.Current?.ActualThemeVariant;
+                    if (themeVariant == Avalonia.Styling.ThemeVariant.Dark)
+                    {
+                        this.Background = new SolidColorBrush(Color.FromRgb(32, 32, 32)); // 深色主题背景
+                    }
+                    else
+                    {
+                        this.Background = new SolidColorBrush(Color.FromRgb(243, 243, 243)); // 浅色主题背景
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Logger.LogError($"应用亚克力效果失败: enable={enable}", "MainWindow.ApplyAcrylicEffect", ex);
+                
+                // 如果失败，使用默认浅色背景
+                this.Background = new SolidColorBrush(Color.FromRgb(240, 240, 240));
+            }
+        }
+
+        /// <summary>
+        /// 主题变化事件处理
+        /// </summary>
+        private void OnThemeChanged(object? sender, EventArgs e)
+        {
+            try
+            {
+                // 只有在亚克力效果关闭时才更新背景
+                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                var configStore = new AppConfigStore(baseDir);
+                var config = configStore.Load();
+                if (!config.EnableAcrylicEffect)
+                {
+                    // 重新应用非亚克力背景以适应新主题
+                    ApplyAcrylicEffect(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("主题变化处理失败", "MainWindow.OnThemeChanged", ex);
             }
         }
     }

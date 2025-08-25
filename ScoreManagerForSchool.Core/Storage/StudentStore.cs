@@ -7,20 +7,25 @@ namespace ScoreManagerForSchool.Core.Storage
 {
     public class StudentStore
     {
-        private readonly string _path;
+        private readonly EncryptedDataStore<List<Student>> _store;
+        private readonly string _baseDir;
 
         public StudentStore(string baseDir)
         {
+            _baseDir = baseDir;
             Directory.CreateDirectory(baseDir);
-            _path = Path.Combine(baseDir, "students.json");
+            _store = new EncryptedDataStore<List<Student>>(baseDir, "students");
+            
+            // 检查是否需要数据迁移
+            CheckAndMigrateData();
         }
 
         public List<Student> Load()
         {
-            if (!File.Exists(_path)) return new List<Student>();
-            var list = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(_path)) ?? new List<Student>();
+            var students = _store.Load() ?? new List<Student>();
             bool changed = false;
-            foreach (var s in list)
+            
+            foreach (var s in students)
             {
                 if (s == null) continue;
                 var wantFull = PinyinUtil.Full(s.Name);
@@ -30,16 +35,27 @@ namespace ScoreManagerForSchool.Core.Storage
                 if (!string.Equals(s.NamePinyinInitials, wantInit, StringComparison.Ordinal))
                 { s.NamePinyinInitials = wantInit; changed = true; }
             }
+            
             if (changed)
             {
-                try { Save(list); } catch { }
+                try { Save(students); } catch { }
             }
-            return list;
+            
+            return students;
         }
 
         public void Save(IEnumerable<Student> students)
         {
-            File.WriteAllText(_path, JsonSerializer.Serialize(students, new JsonSerializerOptions { WriteIndented = true }));
+            _store.Save(new List<Student>(students));
+        }
+
+        private void CheckAndMigrateData()
+        {
+            var jsonPath = Path.Combine(_baseDir, "students.json");
+            if (File.Exists(jsonPath) && !_store.Exists())
+            {
+                DataMigrationHelper.MigrateData<List<Student>>(_baseDir, "students.json", "students");
+            }
         }
     }
 }

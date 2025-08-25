@@ -37,7 +37,10 @@
 - **现代界面**：基于 Avalonia 的现代化 UI 设计
 - **跨平台**：原生支持 Windows、macOS、Linux
 - **响应式**：适配不同屏幕尺寸和分辨率
-- **国际化**：支持多语言界面
+- **主题支持**：支持深色/浅色主题切换和亚克力效果
+- **可配置阈值**：灵活的关键积分阈值系统，支持自定义颜色标识
+- **智能日期选择**：优化的日期选择器，支持快速时间选择
+- **自动更新**：内置更新检查和自动更新功能
 
 ## 🏗️ 技术架构
 
@@ -95,21 +98,21 @@ ScoreManagerForSchool/
 #### 从发布版本安装
 1. 访问 [GitHub Releases](https://github.com/tlnkmc/ScoreManagerForSchool/releases)
 2. 下载对应平台的压缩包：
-   - Windows x64: `scoremgr-win-x64.zip`
-   - Windows ARM64: `scoremgr-win-arm64.zip`  
-   - macOS x64: `scoremgr-osx-x64.tar.gz`
-   - macOS ARM64: `scoremgr-osx-arm64.tar.gz`
-   - Linux x64: `scoremgr-linux-x64.tar.gz`
+   - Windows x64: `ScoreManagerForSchool-win-x64.zip`
+   - Windows ARM64: `ScoreManagerForSchool-win-arm64.zip`  
+   - macOS x64: `ScoreManagerForSchool-osx-x64.tar.gz`
+   - macOS ARM64: `ScoreManagerForSchool-osx-arm64.tar.gz`
+   - Linux x64: `ScoreManagerForSchool-linux-x64.tar.gz`
 
 #### 运行程序
 ```bash
 # Windows
-解压并运行 ScoreManagerForSchool.UI.exe
+解压并运行 scoremgr.exe
 
 # macOS/Linux
-tar -xzf scoremgr-*.tar.gz
-cd scoremgr/
-./ScoreManagerForSchool.UI
+tar -xzf ScoreManagerForSchool-*.tar.gz
+cd ScoreManagerForSchool/
+./scoremgr
 ```
 
 ### 从源码构建
@@ -192,7 +195,30 @@ dotnet test
 
 ## 📋 更新日志
 
-### v1.0.0-beta (当前版本)
+### v1.0.1.1002 (当前版本)
+#### 🎨 界面优化
+- ✨ 修复日期选择器界面问题，优化用户体验和字体大小
+- ✨ 改进导出报表的日期选择器，与积分记录管理保持一致的交互体验
+- ✨ 优化整体UI主题适配和视觉效果
+
+#### 🎯 功能增强
+- ✨ 实现可配置的关键积分阈值系统，支持自定义颜色标识（蓝色/黄色/橙色/红色）
+- ✨ 增加关键积分阈值设置窗口，可动态添加/删除阈值
+- ✨ 增强更新检查功能，提供详细的弹窗反馈（成功/失败/已是最新版本）
+- ✨ 自动更新系统，支持后台下载和智能更新流程
+
+#### 🔧 技术修复
+- 🐛 修复主题设置线程调用错误，确保UI操作在正确线程中执行
+- 🐛 修复日期选择器绑定问题，防止类型转换错误
+- 🐛 优化日期选择器弹窗稳定性，防止立即关闭问题
+
+#### 🚀 更新系统
+- ✨ 完整的自动更新支持，包含独立的更新器程序
+- ✨ 支持多源更新：GitHub、Ghproxy加速、自定义源
+- ✨ Token验证机制确保更新安全性
+- ✨ 跨平台更新包分发（Windows/macOS/Linux）
+
+### v1.0.0-beta
 #### 新功能
 - ✨ 全新的积分筛选系统：支持班级、时间、正负分多维度筛选
 - ✨ 快速时间选择：一键选择今日、昨日、本周、本月
@@ -249,7 +275,6 @@ dotnet test
 tar -xzf scoremgr-osx-x64.tar.gz  # 或对应的文件名
 cd ScoreManagerForSchool/
 ./ScoreManagerForSchool.UI
-```
 
 ## 📖 使用指南
 

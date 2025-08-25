@@ -8,21 +8,24 @@ namespace ScoreManagerForSchool.Core.Storage
 {
     public class TeacherStore
     {
-        private readonly string _path;
+        private readonly EncryptedDataStore<List<Teacher>> _store;
+        private readonly string _baseDir;
 
         public TeacherStore(string baseDir)
         {
+            _baseDir = baseDir;
             Directory.CreateDirectory(baseDir);
-            _path = Path.Combine(baseDir, "teachers.json");
+            _store = new EncryptedDataStore<List<Teacher>>(baseDir, "teachers");
+            
+            // 检查是否需要数据迁移
+            CheckAndMigrateData();
         }
 
         public List<Teacher> Load()
         {
-            if (!File.Exists(_path)) return new List<Teacher>();
-            
             try
             {
-                var teachers = JsonSerializer.Deserialize<List<Teacher>>(File.ReadAllText(_path)) ?? new List<Teacher>();
+                var teachers = _store.Load() ?? new List<Teacher>();
                 
                 // 为现有教师生成拼音（如果缺失）
                 bool hasUpdates = false;
@@ -52,7 +55,16 @@ namespace ScoreManagerForSchool.Core.Storage
 
         public void Save(IEnumerable<Teacher> teachers)
         {
-            File.WriteAllText(_path, JsonSerializer.Serialize(teachers, new JsonSerializerOptions { WriteIndented = true }));
+            _store.Save(new List<Teacher>(teachers));
+        }
+
+        private void CheckAndMigrateData()
+        {
+            var jsonPath = Path.Combine(_baseDir, "teachers.json");
+            if (File.Exists(jsonPath) && !_store.Exists())
+            {
+                DataMigrationHelper.MigrateData<List<Teacher>>(_baseDir, "teachers.json", "teachers");
+            }
         }
 
         // 根据姓名或拼音搜索教师

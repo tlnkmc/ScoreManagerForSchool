@@ -15,9 +15,8 @@
         <!-- 输入框在左，右侧依次为：浏览、预览、保存 -->
         <TextBox Width="300" Watermark="CSV 路径 (students.csv)" Name="CsvPathBox"/>
         <Button Content="浏览" Click="OnBrowseCsv" Tag="{Binding #CsvPathBox}"/>
-        <Button Content="预览" Click="OnPreviewImport"/>
-        <Button Content="保存" Click="OnImportAndSave"/>
-        <CheckBox Name="HeaderCheck" IsChecked="True" Content="首行为表头" VerticalAlignment="Center"/>
+  <Button Content="预览" Click="OnPreviewImport"/>
+  <Button Content="保存" Click="OnImportAndSave"/>
   <Button Content="格式说明" Click="OnShowFormatInfo"/>
         <TextBox Width="240" Watermark="搜索 (姓名/学号/班级)" Text="{Binding Query, Mode=TwoWay}"/>
       </StackPanel>

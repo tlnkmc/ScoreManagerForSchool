@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ScoreManagerForSchool.UI.Views.Dialogs.SubjectGroupManager"
+        x:CompileBindings="False"
+        Title="科目组管理" Width="600" Height="500"
+        WindowStartupLocation="CenterOwner">
+  
+  <Grid RowDefinitions="Auto,*,Auto" Margin="16" RowSpacing="12">
+    
+    <!-- 标题和操作按钮 -->
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <TextBlock Text="科目组管理" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+      <Button Content="新增" x:Name="AddBtn" Padding="8,4"/>
+      <Button Content="删除选中" x:Name="DeleteBtn" Padding="8,4"/>
+      <Button Content="重置为默认" x:Name="ResetBtn" Padding="8,4"/>
+    </StackPanel>
+
+    <!-- 数据列表 -->
+    <ScrollViewer Grid.Row="1">
+      <ListBox x:Name="ItemsList" SelectionMode="Single">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="*,2*,Auto" ColumnSpacing="8" Margin="4">
+              <TextBox Grid.Column="0" Text="{Binding Name}" Watermark="科目组名称"/>
+              <TextBox Grid.Column="1" Text="{Binding Description}" Watermark="描述"/>
+              <Button Grid.Column="2" Content="删除" Click="OnDeleteItem" Tag="{Binding}"/>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </ScrollViewer>
+
+    <!-- 底部按钮 -->
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Content="保存" x:Name="SaveBtn" Padding="12,6"/>
+      <Button Content="关闭" x:Name="CloseBtn" Padding="12,6"/>
+    </StackPanel>
+    
+  </Grid>
+</Window>

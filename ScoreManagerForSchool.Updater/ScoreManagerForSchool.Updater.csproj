@@ -7,8 +7,8 @@
     <AssemblyName>update</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
-    <AssemblyVersion>1.0.0.0010</AssemblyVersion>
-    <FileVersion>1.0.0.0010</FileVersion>
-    <InformationalVersion>1.0.0-beta</InformationalVersion>
+    <AssemblyVersion>1.0.1.1002</AssemblyVersion>
+    <FileVersion>1.0.1.1002</FileVersion>
+    <InformationalVersion>1.0.1-release</InformationalVersion>
   </PropertyGroup>
 </Project>

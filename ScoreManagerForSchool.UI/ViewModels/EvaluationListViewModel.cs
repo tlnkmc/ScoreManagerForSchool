@@ -35,15 +35,15 @@ namespace ScoreManagerForSchool.UI.ViewModels
             set { _selectedClass = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedClass))); FilterEvaluations(); }
         }
 
-        private DateTime? _startDate;
-        public DateTime? StartDate
+        private DateTimeOffset? _startDate;
+        public DateTimeOffset? StartDate
         {
             get => _startDate;
             set { _startDate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StartDate))); FilterEvaluations(); }
         }
 
-        private DateTime? _endDate;
-        public DateTime? EndDate
+        private DateTimeOffset? _endDate;
+        public DateTimeOffset? EndDate
         {
             get => _endDate;
             set { _endDate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EndDate))); FilterEvaluations(); }
@@ -172,11 +172,11 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 // 时间范围筛选
                 if (StartDate.HasValue)
                 {
-                    filtered = filtered.Where(e => e.Date >= StartDate.Value.Date);
+                    filtered = filtered.Where(e => e.Date >= StartDate.Value.DateTime.Date);
                 }
                 if (EndDate.HasValue)
                 {
-                    filtered = filtered.Where(e => e.Date <= EndDate.Value.Date.AddDays(1).AddTicks(-1));
+                    filtered = filtered.Where(e => e.Date <= EndDate.Value.DateTime.Date.AddDays(1).AddTicks(-1));
                 }
 
                 // 负分筛选
