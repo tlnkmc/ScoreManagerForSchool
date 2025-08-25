@@ -47,34 +47,33 @@ namespace ScoreManagerForSchool.UI.Views
         {
             try
             {
-                var tb = this.FindControl<TextBox>("CsvPathBox");
-                var initPath = tb?.Text ?? string.Empty;
-                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog();
-                if (!string.IsNullOrWhiteSpace(initPath)) dlg.FindControl<TextBox>("PathBox")!.Text = initPath;
+                // 直接打开文件选择器
+                var top = TopLevel.GetTopLevel(this);
+                if (top == null) return;
 
-                bool ok = false;
+                var path = await FilePickerUtil.PickCsvOrExcelToLocalPathAsync(top, "选择学生名单文件");
+                if (string.IsNullOrEmpty(path)) return;
+
+                // 获取基础目录
+                var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "base");
+                
+                // 创建并显示预览对话框，自动加载文件
+                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog(baseDir, path);
+                
+                bool result = false;
                 if (this.VisualRoot is Window win)
-                    ok = await dlg.ShowDialog<bool>(win);
-                else
-                    dlg.Show();
-                if (!ok) return;
-
-                var (path, header, cCol, iCol, nCol) = dlg.GetResult();
-                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) { await ShowMessageAsync("错误", "无效的文件路径"); return; }
-                var ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
-                if (ext != ".csv" && ext != ".xls" && ext != ".xlsx")
-                { await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。"); return; }
-
-                if (DataContext is StudentsViewModel vm)
+                    result = await dlg.ShowDialog<bool>(win);
+                
+                if (result)
                 {
-                    // reuse VM simple import (default order) if mapping equals default; else map in Core directly
-                    if (cCol == 0 && iCol == 1 && nCol == 2)
-                        vm.ImportCsv(path, header);
-                    else
+                    // 导入成功，重新加载学生列表
+                    if (DataContext is StudentsViewModel vm)
                     {
-                        var imported = CsvImporter.ImportStudents(path!, header, cCol, iCol, nCol);
-                        vm.ApplyImported(imported);
+                        vm.Load();
                     }
+                    
+                    // 更新路径显示
+                    var tb = this.FindControl<TextBox>("CsvPathBox");
                     if (tb != null) tb.Text = path;
                 }
             }
@@ -174,33 +173,35 @@ namespace ScoreManagerForSchool.UI.Views
         {
             try
             {
-                var tb = this.FindControl<TextBox>("CsvPathBox");
-                var initPath = tb?.Text ?? string.Empty;
-                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog();
-                if (!string.IsNullOrWhiteSpace(initPath)) dlg.FindControl<TextBox>("PathBox")!.Text = initPath;
+                // 直接打开文件选择器
+                var top = TopLevel.GetTopLevel(this);
+                if (top == null) return;
 
-                bool ok = false;
-                if (this.VisualRoot is Window win)
-                    ok = await dlg.ShowDialog<bool>(win);
-                else
-                    dlg.Show();
-                if (!ok) return;
+                var path = await FilePickerUtil.PickCsvOrExcelToLocalPathAsync(top, "选择学生名单文件");
+                if (string.IsNullOrEmpty(path)) return;
 
-                var (path, header, cCol, iCol, nCol) = dlg.GetResult();
-                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) { await ShowMessageAsync("错误", "无效的文件路径"); return; }
-                var ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
-                if (ext != ".csv" && ext != ".xls" && ext != ".xlsx")
-                { await ShowMessageAsync("错误", "仅支持 CSV/XLS/XLSX 文件。"); return; }
-
-                var imported = CsvImporter.ImportStudents(path!, header, cCol, iCol, nCol);
+                // 获取基础目录
                 var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "base");
-                if (!ScoreManagerForSchool.UI.Security.AuthManager.Ensure(baseDir)) return;
-                new StudentStore(baseDir).Save(imported);
-                if (DataContext is StudentsViewModel vm)
+                
+                // 创建并显示预览对话框，自动加载文件
+                var dlg = new ScoreManagerForSchool.UI.Views.Dialogs.ImportPreviewDialog(baseDir, path);
+                
+                bool result = false;
+                if (this.VisualRoot is Window win)
+                    result = await dlg.ShowDialog<bool>(win);
+                
+                if (result)
                 {
-                    vm.Load();
+                    // 导入成功，重新加载学生列表
+                    if (DataContext is StudentsViewModel vm)
+                    {
+                        vm.Load();
+                    }
+                    
+                    // 更新路径显示
+                    var tb = this.FindControl<TextBox>("CsvPathBox");
+                    if (tb != null) tb.Text = path;
                 }
-                if (tb != null) tb.Text = path;
             }
             catch (Exception ex)
             {
