@@ -7,7 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using ScoreManagerForSchool.Core.Storage;
+using ScoreManagerForSchool.UI.Views;
 
 namespace ScoreManagerForSchool.UI.ViewModels
 {
@@ -31,7 +34,6 @@ namespace ScoreManagerForSchool.UI.ViewModels
         private readonly string _baseDir;
         private List<EvaluationEntry> _allEvaluations = new();
         private List<Student> _allStudents = new();
-        private double _criticalScoreThreshold = -10.0; // 默认关键积分阈值
 
         public ObservableCollection<EvaluationEntry> PendingTop { get; } = new();
         public ObservableCollection<StatsSummaryItem> Summary { get; } = new();
@@ -40,20 +42,6 @@ namespace ScoreManagerForSchool.UI.ViewModels
         public SortKey SortBy { get; private set; } = SortKey.Score;
         public bool SortDesc { get; private set; } = true;
 
-        public double CriticalScoreThreshold 
-        { 
-            get => _criticalScoreThreshold;
-            set
-            {
-                if (_criticalScoreThreshold != value)
-                {
-                    _criticalScoreThreshold = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CriticalScoreThreshold)));
-                    ApplySummary(); // 重新计算汇总
-                }
-            }
-        }
-
         public ICommand RefreshCommand { get; }
         public ICommand ExportCommand { get; }
         public ICommand ProcessPendingCommand { get; }
@@ -61,7 +49,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
         public ICommand SortCommand { get; }
         public ICommand EditEvaluationCommand { get; }
         public ICommand DeleteEvaluationCommand { get; }
-        public ICommand SetCriticalThresholdCommand { get; }
+        public ICommand OpenCriticalLevelsCommand { get; }
 
         public StatsViewModel(string? baseDir = null)
         {
@@ -73,7 +61,7 @@ namespace ScoreManagerForSchool.UI.ViewModels
             SortCommand = new RelayCommand(p => ToggleSort(p as string));
             EditEvaluationCommand = new RelayCommand(p => EditEvaluation(p as EvaluationEntry));
             DeleteEvaluationCommand = new RelayCommand(p => DeleteEvaluation(p as EvaluationEntry));
-            SetCriticalThresholdCommand = new RelayCommand(p => SetCriticalThreshold(p as string));
+            OpenCriticalLevelsCommand = new RelayCommand(_ => OpenCriticalLevelsWindow());
             Load();
         }
 
@@ -345,11 +333,13 @@ namespace ScoreManagerForSchool.UI.ViewModels
             return s;
         }
 
-        private void SetCriticalThreshold(string? thresholdStr)
+        private async void OpenCriticalLevelsWindow()
         {
-            if (double.TryParse(thresholdStr, out double threshold))
+            var window = new CriticalScoreLevelsWindow();
+            var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+            if (mainWindow != null)
             {
-                CriticalScoreThreshold = threshold;
+                await window.ShowDialog(mainWindow);
             }
         }
     }

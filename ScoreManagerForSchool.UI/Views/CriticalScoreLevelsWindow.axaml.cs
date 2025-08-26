@@ -10,10 +10,10 @@ namespace ScoreManagerForSchool.UI.Views
         {
             InitializeComponent();
             
-            if (DataContext is CriticalScoreLevelsViewModel vm)
-            {
-                vm.CloseWindow = () => Close();
-            }
+            // 创建并设置ViewModel
+            var viewModel = new CriticalScoreLevelsViewModel();
+            DataContext = viewModel;
+            viewModel.CloseWindow = () => Close();
         }
 
         private void InitializeComponent()

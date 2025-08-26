@@ -11,38 +11,38 @@
     <TextBlock Text="欢迎使用 ScoreManagerForSchool，请完成首次设置" FontWeight="Bold"/>
   <TextBlock Text="用户密码 (8~256):"/>
   <StackPanel Orientation="Horizontal" Spacing="6">
-    <controls:PasswordTextBox Name="UserPwdBox" Width="320" Watermark="输入用户密码" Text="{Binding UserPasswordString, Mode=TwoWay}"/>
-    <controls:PasswordTextBox Name="UserPwdConfirmBox" Width="320" Watermark="确认用户密码" Text="{Binding UserPasswordConfirmString, Mode=TwoWay}"/>
+  <controls:PasswordTextBox Name="UserPwdBox" Width="320" Watermark="输入用户密码" Text="{Binding UserPasswordString, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+  <controls:PasswordTextBox Name="UserPwdConfirmBox" Width="320" Watermark="确认用户密码" Text="{Binding UserPasswordConfirmString, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
   </StackPanel>
-  <TextBox Watermark="用户密码提示 (可选)" Text="{Binding UserHint}"/>
+  <TextBox Watermark="用户密码提示 (可选)" Text="{Binding UserHint, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
 
   <StackPanel Spacing="6">
     <TextBlock Text="密保问题 (用于找回密码)" FontWeight="SemiBold"/>
     <StackPanel Orientation="Horizontal" Spacing="6">
-      <TextBox Name="Qa1QBox" Width="320" Watermark="问题1" Text="{Binding Qa1Question}"/>
-      <TextBox Name="Qa1ABox" Width="320" Watermark="答案1" Text="{Binding Qa1Answer}"/>
+  <TextBox Name="Qa1QBox" Width="320" Watermark="问题1" Text="{Binding Qa1Question, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+  <TextBox Name="Qa1ABox" Width="320" Watermark="答案1" Text="{Binding Qa1Answer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
     </StackPanel>
     <StackPanel Orientation="Horizontal" Spacing="6">
-      <TextBox Name="Qa2QBox" Width="320" Watermark="问题2" Text="{Binding Qa2Question}"/>
-      <TextBox Name="Qa2ABox" Width="320" Watermark="答案2" Text="{Binding Qa2Answer}"/>
+  <TextBox Name="Qa2QBox" Width="320" Watermark="问题2" Text="{Binding Qa2Question, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+  <TextBox Name="Qa2ABox" Width="320" Watermark="答案2" Text="{Binding Qa2Answer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
     </StackPanel>
   </StackPanel>
 
       <StackPanel Orientation="Vertical" Spacing="6">
       <StackPanel Orientation="Horizontal" Spacing="8">
-  <TextBox Width="400" Name="StudentsPathBox" Watermark="学生名单 CSV 路径" Text="{Binding StudentsPath, Mode=TwoWay}"/>
+  <TextBox Width="400" Name="StudentsPathBox" Watermark="学生名单 CSV 路径" Text="{Binding StudentsPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
   <CheckBox Name="StudentsHeaderCheck" IsChecked="{Binding StudentsHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
         <Button Content="浏览..." Click="OnBrowseStudents" />
         <Button Content="格式说明" Click="OnShowFormatInfo" />
       </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="8">
-  <TextBox Width="400" Name="ClassesPathBox" Watermark="班级列表 CSV 路径" Text="{Binding ClassesPath, Mode=TwoWay}"/>
+  <TextBox Width="400" Name="ClassesPathBox" Watermark="班级列表 CSV 路径" Text="{Binding ClassesPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
   <CheckBox Name="ClassesHeaderCheck" IsChecked="{Binding ClassesHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
         <Button Content="浏览..." Click="OnBrowseClasses" />
         <Button Content="格式说明" Click="OnShowFormatInfo" />
       </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="8">
-  <TextBox Width="400" Name="SchemesPathBox" Watermark="评价方案 CSV 路径" Text="{Binding SchemesPath, Mode=TwoWay}"/>
+  <TextBox Width="400" Name="SchemesPathBox" Watermark="评价方案 CSV 路径" Text="{Binding SchemesPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
   <CheckBox Name="SchemesHeaderCheck" IsChecked="{Binding SchemesHasHeader, Mode=TwoWay}" Content="首行为表头" VerticalAlignment="Center"/>
         <Button Content="浏览..." Click="OnBrowseSchemes" />
         <Button Content="格式说明" Click="OnShowFormatInfo" />

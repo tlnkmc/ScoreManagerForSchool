@@ -17,7 +17,7 @@ sealed class Program
         {
             // 初始化日志系统
             Logger.Initialize();
-            Logger.LogInfo("应用程序开始启动", "Program.Main");
+            Logger.LogInfo("Application startup initiated", "Program.Main");
 
             // 设置全局异常处理
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -27,7 +27,7 @@ sealed class Program
         }
         catch (Exception ex)
         {
-            Logger.LogError("应用程序启动失败", "Program.Main", ex);
+            Logger.LogError("Application startup failed", "Program.Main", ex);
             ErrorHandler.HandleError(ex, "应用程序启动失败，请查看日志文件获取详细信息。", "Program.Main");
             throw;
         }
@@ -41,7 +41,7 @@ sealed class Program
     {
         if (e.ExceptionObject is Exception exception)
         {
-            Logger.LogError("未处理的异常", "AppDomain", exception);
+            Logger.LogError("Unhandled exception", "AppDomain", exception);
             ErrorHandler.HandleError(exception, "应用程序遇到了未处理的错误。", "AppDomain");
         }
     }

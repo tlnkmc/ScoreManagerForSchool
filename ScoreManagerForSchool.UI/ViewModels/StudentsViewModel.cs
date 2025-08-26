@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using ScoreManagerForSchool.Core.Storage;
+using ScoreManagerForSchool.Core.Tools;
 using ScoreManagerForSchool.UI.Security;
 
 namespace ScoreManagerForSchool.UI.ViewModels;
@@ -95,8 +96,8 @@ public class StudentsViewModel : INotifyPropertyChanged
         var store = new StudentStore(_baseDir);
         var list = store.Load();
         var idx = list.FindIndex(s => s.Id == row.Id);
-        var full = ScoreManagerForSchool.Core.Storage.PinyinUtil.Full(row.Name);
-        var init = ScoreManagerForSchool.Core.Storage.PinyinUtil.Initials(row.Name);
+        var full = PinyinUtil.Full(row.Name);
+        var init = PinyinUtil.Initials(row.Name);
         var newItem = new Student { Class = row.Class, Id = row.Id, Name = row.Name, NamePinyin = full, NamePinyinInitials = init };
         if (idx >= 0) list[idx] = newItem;
         else list.Add(newItem);
@@ -147,7 +148,7 @@ public class StudentsViewModel : INotifyPropertyChanged
         Students = _filtered.Skip(skip).Take(PageSize).ToList();
     }
 
-    private Student CloneStudent(Student s) => new Student { Class = s.Class, Id = s.Id, Name = s.Name, NamePinyin = ScoreManagerForSchool.Core.Storage.PinyinUtil.Full(s.Name), NamePinyinInitials = ScoreManagerForSchool.Core.Storage.PinyinUtil.Initials(s.Name) };
+    private Student CloneStudent(Student s) => new Student { Class = s.Class, Id = s.Id, Name = s.Name, NamePinyin = PinyinUtil.Full(s.Name), NamePinyinInitials = PinyinUtil.Initials(s.Name) };
 
     public void Load()
     {
@@ -219,8 +220,8 @@ public class StudentsViewModel : INotifyPropertyChanged
         var store = new StudentStore(_baseDir);
         var list = store.Load();
         var idx = list.FindIndex(s => s.Id == SelectedStudent.Id);
-        var full = ScoreManagerForSchool.Core.Storage.PinyinUtil.Full(SelectedStudent.Name);
-        var init = ScoreManagerForSchool.Core.Storage.PinyinUtil.Initials(SelectedStudent.Name);
+        var full = PinyinUtil.Full(SelectedStudent.Name);
+        var init = PinyinUtil.Initials(SelectedStudent.Name);
         if (idx >= 0)
         {
             list[idx].Class = SelectedStudent.Class;

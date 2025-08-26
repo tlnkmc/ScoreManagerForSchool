@@ -94,6 +94,8 @@ namespace ScoreManagerForSchool.UI.ViewModels
             };
             var q = _evalsCache.AsEnumerable();
             if (cutoff != null) q = q.Where(e => e.Date >= cutoff.Value);
+            // 过滤掉待处理项（没有学生姓名的记录）
+            q = q.Where(e => !string.IsNullOrWhiteSpace(e.Name));
             q = q.OrderByDescending(e => e.Date).Take(8);
             Recent.Clear();
             foreach (var e in q) Recent.Add(e);

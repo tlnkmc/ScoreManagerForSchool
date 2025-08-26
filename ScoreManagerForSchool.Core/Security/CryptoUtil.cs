@@ -48,10 +48,12 @@ namespace ScoreManagerForSchool.Core.Security
         // 确保 keyBytes 长度为 sizeBytes（不足补0，超出截断）
         private static byte[] NormalizeKeyBytes(byte[] keyBytes, int sizeBytes)
         {
-            if (keyBytes == null) return new byte[sizeBytes];
-            if (keyBytes.Length == sizeBytes) return keyBytes;
             var outBytes = new byte[sizeBytes];
-            Array.Clear(outBytes, 0, outBytes.Length);
+            if (keyBytes == null || keyBytes.Length == 0)
+            {
+                // already zeroed
+                return outBytes;
+            }
             Buffer.BlockCopy(keyBytes, 0, outBytes, 0, Math.Min(keyBytes.Length, sizeBytes));
             return outBytes;
         }
@@ -67,20 +69,20 @@ namespace ScoreManagerForSchool.Core.Security
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
                 aes.GenerateIV();
-                using var ms = new MemoryStream();
-                ms.Write(aes.IV, 0, aes.IV.Length);
-                using var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
                 var plain = Encoding.UTF8.GetBytes(plainText);
                 try
                 {
-                    cs.Write(plain, 0, plain.Length);
-                    cs.FlushFinalBlock();
+                    using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                    var cipher = encryptor.TransformFinalBlock(plain, 0, plain.Length);
+                    var output = new byte[aes.IV.Length + cipher.Length];
+                    Buffer.BlockCopy(aes.IV, 0, output, 0, aes.IV.Length);
+                    Buffer.BlockCopy(cipher, 0, output, aes.IV.Length, cipher.Length);
+                    return Convert.ToBase64String(output);
                 }
                 finally
                 {
                     if (plain != null) Array.Clear(plain, 0, plain.Length);
                 }
-                return Convert.ToBase64String(ms.ToArray());
             }
             finally
             {
@@ -100,22 +102,22 @@ namespace ScoreManagerForSchool.Core.Security
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
                 aes.GenerateIV();
-                using var ms = new MemoryStream();
-                ms.Write(aes.IV, 0, aes.IV.Length);
-                using var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
                 var byteCount = Encoding.UTF8.GetByteCount(plainChars);
                 using var buf = new SecurePinnedBuffer(byteCount);
                 try
                 {
                     Encoding.UTF8.GetBytes(plainChars, buf.Buffer);
-                    cs.Write(buf.Buffer, 0, buf.Buffer.Length);
-                    cs.FlushFinalBlock();
+                    using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                    var cipher = encryptor.TransformFinalBlock(buf.Buffer, 0, buf.Buffer.Length);
+                    var output = new byte[aes.IV.Length + cipher.Length];
+                    Buffer.BlockCopy(aes.IV, 0, output, 0, aes.IV.Length);
+                    Buffer.BlockCopy(cipher, 0, output, aes.IV.Length, cipher.Length);
+                    return Convert.ToBase64String(output);
                 }
                 finally
                 {
                     // SecurePinnedBuffer.Dispose will clear buffer
                 }
-                return Convert.ToBase64String(ms.ToArray());
             }
             finally
             {
@@ -156,57 +158,44 @@ namespace ScoreManagerForSchool.Core.Security
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
                 
-                using var ms = new MemoryStream(data);
+                // 拆分 IV 与密文
                 var iv = new byte[16];
-                var ivBytesRead = ms.Read(iv, 0, iv.Length);
-                
-                if (ivBytesRead != 16)
-                    throw new ArgumentException("加密数据格式无效：无法读取IV");
-                
+                Buffer.BlockCopy(data, 0, iv, 0, 16);
+                var cipherLen = data.Length - 16;
+                var cipher = new byte[cipherLen];
+                Buffer.BlockCopy(data, 16, cipher, 0, cipherLen);
                 aes.IV = iv;
-                
-                // 检查是否还有加密数据
-                var remainingDataLength = ms.Length - ms.Position;
-                if (remainingDataLength <= 0)
-                    throw new ArgumentException("加密数据格式无效：没有加密内容");
-                
-                if (remainingDataLength % 16 != 0)
-                    throw new ArgumentException($"加密数据格式无效：加密内容长度 {remainingDataLength} 不是16的倍数");
-                
-                using var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read);
-                using var sr = new StreamReader(cs, Encoding.UTF8);
-                
+
                 try
                 {
-                    var result = sr.ReadToEnd();
-                    
-                    // 验证解密结果不为空
+                    using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                    var plain = decryptor.TransformFinalBlock(cipher, 0, cipher.Length);
+                    var result = Encoding.UTF8.GetString(plain);
                     if (string.IsNullOrEmpty(result))
-                        throw new CryptographicException("解密结果为空，可能是密钥错误");
-                    
+                        throw new CryptographicException("Decryption result is empty, possibly wrong key");
                     return result;
                 }
-                catch (CryptographicException ex) when (ex.Message.Contains("Padding is invalid"))
+                catch (CryptographicException ex) when (ex.Message.Contains("Padding is invalid", StringComparison.OrdinalIgnoreCase) || ex.Message.Contains("padding", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new CryptographicException(
-                        "解密失败：填充无效。可能原因：\n" +
-                        "1. 密钥不正确\n" +
-                        "2. 加密数据已损坏\n" +
-                        "3. 数据格式不匹配\n" +
-                        $"数据长度: {data.Length} 字节", ex);
+                        "Decryption failed: Invalid padding. Possible reasons:\n" +
+                        "1. Key is incorrect\n" +
+                        "2. Encrypted data is corrupted\n" +
+                        "3. Data format mismatch\n" +
+                        $"Data length: {data.Length} bytes", ex);
                 }
                 catch (CryptographicException ex)
                 {
-                    throw new CryptographicException($"解密失败：{ex.Message}。数据长度: {data.Length} 字节", ex);
+                    throw new CryptographicException($"Decryption failed: {ex.Message}. Data length: {data.Length} bytes", ex);
                 }
                 catch (Exception ex)
                 {
-                    throw new CryptographicException($"解密过程中发生未知错误：{ex.Message}", ex);
+                    throw new CryptographicException($"Unknown error during decryption: {ex.Message}", ex);
                 }
             }
             catch (FormatException ex)
             {
-                throw new ArgumentException("Base64格式无效", nameof(cipherBase64), ex);
+                throw new ArgumentException("Invalid Base64 format", nameof(cipherBase64), ex);
             }
             finally
             {
@@ -221,10 +210,10 @@ namespace ScoreManagerForSchool.Core.Security
         public static string SafeDecryptFromBase64(string cipherBase64, byte[] keyBytes, bool allowFallback = true)
         {
             if (string.IsNullOrEmpty(cipherBase64))
-                throw new ArgumentException("密文不能为空", nameof(cipherBase64));
+                throw new ArgumentException("Cipher text cannot be empty", nameof(cipherBase64));
             
             if (keyBytes == null || keyBytes.Length == 0)
-                throw new ArgumentException("密钥不能为空", nameof(keyBytes));
+                throw new ArgumentException("Key cannot be empty", nameof(keyBytes));
 
             // 首先尝试正常解密
             try
@@ -235,8 +224,8 @@ namespace ScoreManagerForSchool.Core.Security
             {
                 // 记录详细错误信息
                 var diagnosis = DiagnoseEncryptedData(cipherBase64);
-                System.Diagnostics.Debug.WriteLine($"解密失败，诊断信息：\n{diagnosis}");
-                System.Diagnostics.Debug.WriteLine($"错误详情：{ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Decryption failed, diagnostic info:\n{diagnosis}");
+                System.Diagnostics.Debug.WriteLine($"Error details: {ex.Message}");
                 
                 // 尝试替代解密方法
                 return TryAlternativeDecryption(cipherBase64, keyBytes);
@@ -387,45 +376,45 @@ namespace ScoreManagerForSchool.Core.Security
         public static string DiagnoseEncryptedData(string cipherBase64)
         {
             if (string.IsNullOrEmpty(cipherBase64))
-                return "❌ 密文为空";
+                return "Cipher text is empty";
 
             try
             {
                 var data = Convert.FromBase64String(cipherBase64);
-                var result = $"✅ Base64解码成功\n";
-                result += $"📊 数据长度: {data.Length} 字节\n";
+                var result = $"Base64 decode successful\n";
+                result += $"Data length: {data.Length} bytes\n";
                 
                 if (data.Length < 16)
                 {
-                    result += "❌ 数据长度不足（需要至少16字节IV）\n";
+                    result += "Data length insufficient (requires at least 16 bytes for IV)\n";
                     return result;
                 }
                 
-                result += $"📦 IV长度: 16 字节\n";
-                result += $"🔐 加密内容长度: {data.Length - 16} 字节\n";
+                result += $"IV length: 16 bytes\n";
+                result += $"Encrypted content length: {data.Length - 16} bytes\n";
                 
                 var encryptedContentLength = data.Length - 16;
                 if (encryptedContentLength % 16 == 0)
                 {
-                    result += "✅ 加密内容长度符合AES块大小要求\n";
+                    result += "Encrypted content length meets AES block size requirement\n";
                 }
                 else
                 {
-                    result += $"⚠️ 加密内容长度不是16的倍数（余数: {encryptedContentLength % 16}）\n";
+                    result += $"Encrypted content length is not multiple of 16 (remainder: {encryptedContentLength % 16})\n";
                 }
                 
                 // 显示IV的前4个字节（用于调试）
-                result += $"🔑 IV前缀: {Convert.ToHexString(data[0..Math.Min(4, data.Length)])}...\n";
+                result += $"IV prefix: {Convert.ToHexString(data[0..Math.Min(4, data.Length)])}...\n";
                 
                 return result;
             }
             catch (FormatException)
             {
-                return "❌ Base64格式无效";
+                return "Invalid Base64 format";
             }
             catch (Exception ex)
             {
-                return $"❌ 诊断失败: {ex.Message}";
+                return $"Diagnosis failed: {ex.Message}";
             }
         }
     }

@@ -8,6 +8,7 @@ using Avalonia.Markup.Xaml;
 // Removed duplicate usings
 using ScoreManagerForSchool.UI.ViewModels;
 using ScoreManagerForSchool.UI.Views;
+using ScoreManagerForSchool.Core.Logging;
 using ScoreManagerForSchool.Core.Storage;
 using Avalonia.Styling;
 using Avalonia.Controls;
@@ -21,6 +22,8 @@ namespace ScoreManagerForSchool.UI;
 
 public partial class App : Application
 {
+    private static bool _updateCheckInProgress = false;
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -171,6 +174,15 @@ public partial class App : Application
 
     private async void TryAutoCheckUpdateAsync(Window owner, string baseDir)
     {
+        // 防止重复检查
+        if (_updateCheckInProgress)
+        {
+            Logger.LogInfo("Update check already in progress, skipping duplicate request", "App");
+            return;
+        }
+
+        _updateCheckInProgress = true;
+        
         try
         {
             var cfg = new AppConfigStore(baseDir).Load();
@@ -225,27 +237,50 @@ public partial class App : Application
                 var raw = "https://raw.githubusercontent.com/tlnkmc/ScoreManagerForSchool/main/ver.txt";
                 feed = Updater.BuildSourceUrl(raw, cfg.UpdateSource);
             }
-            if (string.IsNullOrWhiteSpace(feed)) return;
+            if (string.IsNullOrWhiteSpace(feed)) 
+            {
+                Logger.LogWarning("Background update check cancelled - Update source configuration is empty", "App");
+                return;
+            }
 
+            Logger.LogInfo($"Starting background update check - Update source: {cfg.UpdateSource}, URL: {feed}", "App");
             var info = await Updater.CheckAsync(feed!).ConfigureAwait(false);
-            if (info == null || string.IsNullOrWhiteSpace(info.Version)) return;
+            if (info == null || string.IsNullOrWhiteSpace(info.Version)) 
+            {
+                Logger.LogWarning("Background update check failed - No valid version info received", "App");
+                return;
+            }
 
             var current = Updater.GetCurrentVersion();
             bool newer = Updater.IsNewer(current, info.Version!);
+            Logger.LogInfo($"Background update check completed - Current version: {current}, Remote version: {info.Version}, Has new version: {newer}", "App");
 
             if (!newer) return;
 
+            Logger.LogInfo("New version found, starting background update package download", "App");
             // 后台下载到程序目录，并准备 update 包
             var pkg = await Updater.DownloadAndPrepareUpdateAsync(info, cfg.UpdateSource, AppContext.BaseDirectory).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(pkg)) return;
+            if (string.IsNullOrWhiteSpace(pkg)) 
+            {
+                Logger.LogError("Background update package download failed", "App");
+                return;
+            }
+
+            Logger.LogInfo($"Background update package download successful: {pkg}", "App");
+            Logger.LogInfo("Preparing to show update notification window", "App");
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 var win = new Views.UpdateAvailableWindow { DataContext = info };
                 win.Show(owner);
+                Logger.LogInfo("Update notification window displayed", "App");
             });
         }
         catch { }
+        finally
+        {
+            _updateCheckInProgress = false;
+        }
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

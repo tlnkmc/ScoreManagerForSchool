@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace ScoreManagerForSchool.Core.Logging
 {
@@ -9,6 +10,7 @@ namespace ScoreManagerForSchool.Core.Logging
         private static readonly object _lock = new object();
         private static string? _logFilePath;
         private static bool _initialized = false;
+        private static readonly Encoding _utf8WithBom = new UTF8Encoding(true); // 使用带BOM的UTF-8解决乱码问题
 
         public static void Initialize()
         {
@@ -21,12 +23,16 @@ namespace ScoreManagerForSchool.Core.Logging
                 Directory.CreateDirectory(logsDir);
 
                 var startTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                _logFilePath = Path.Combine(logsDir, $"smfs_{startTime}.log");
+                _logFilePath = Path.Combine(logsDir, $"smfs_{startTime}.log"); // 改回.log扩展名，确保正确的UTF-8编码
 
-                // 写入启动日志
-                WriteToFile($"=== 应用程序启动 === {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
-                WriteToFile($"程序目录: {programDir}");
-                WriteToFile($"日志文件: {_logFilePath}");
+                // 先写入UTF-8 BOM标记，确保文件被识别为UTF-8
+                File.WriteAllText(_logFilePath, "", _utf8WithBom);
+                
+                // 写入启动日志（使用英文避免编码问题）
+                WriteToFile($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [INFO] [Logger] Application started");
+                WriteToFile($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [INFO] [Logger] Program directory: {programDir}");
+                WriteToFile($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [INFO] [Logger] Log file: {_logFilePath}");
+                WriteToFile($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [INFO] [Logger] Log encoding: UTF-8 with BOM");
 
                 _initialized = true;
             }
@@ -37,7 +43,9 @@ namespace ScoreManagerForSchool.Core.Logging
                 {
                     var tempDir = Path.GetTempPath();
                     _logFilePath = Path.Combine(tempDir, $"smfs_fallback_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
-                    WriteToFile($"日志初始化失败，使用临时目录: {ex.Message}");
+                    // 先写入UTF-8 BOM
+                    File.WriteAllText(_logFilePath, "", _utf8WithBom);
+                    WriteToFile($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [ERROR] [Logger] Log initialization failed, using temp directory: {ex.Message}");
                 }
                 catch
                 {
@@ -84,12 +92,18 @@ namespace ScoreManagerForSchool.Core.Logging
             try
             {
                 var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                var sourceInfo = string.IsNullOrWhiteSpace(source) ? "" : $" [{source}]";
-                var logEntry = $"[{timestamp}] [{level}]{sourceInfo} {message}";
+                
+                // 使用简化的文本格式，避免控制台输出问题
+                var logEntry = $"[{timestamp}] [{level}]";
+                if (!string.IsNullOrWhiteSpace(source))
+                {
+                    logEntry += $" [{source}]";
+                }
+                logEntry += $" {message}";
 
                 WriteToFile(logEntry);
 
-                // 在Debug模式下也输出到控制台
+                // 在Debug模式下输出到控制台
 #if DEBUG
                 Console.WriteLine(logEntry);
 #endif
@@ -108,7 +122,13 @@ namespace ScoreManagerForSchool.Core.Logging
             {
                 try
                 {
-                    File.AppendAllText(_logFilePath, content + Environment.NewLine, System.Text.Encoding.UTF8);
+                    // 使用FileStream确保正确的UTF-8编码写入
+                    using (var stream = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
+                    using (var writer = new StreamWriter(stream, _utf8WithBom))
+                    {
+                        writer.WriteLine(content);
+                        writer.Flush();
+                    }
                 }
                 catch
                 {
@@ -124,7 +144,49 @@ namespace ScoreManagerForSchool.Core.Logging
 
         public static void LogApplicationShutdown()
         {
-            LogInfo("=== 应用程序关闭 ===");
+            LogInfo("Application shutdown");
+        }
+
+        // 新增：详细版本检查日志方法
+        public static void LogVersionCheckStart(string feedUrl, string currentVersion)
+        {
+            LogInfo($"Version check started - Current version: {currentVersion}, Feed URL: {feedUrl}", "Updater");
+        }
+
+        public static void LogVersionCheckResult(string currentVersion, string? remoteVersion, bool hasUpdate)
+        {
+            if (remoteVersion == null)
+            {
+                LogWarning("Version check failed - Unable to get remote version info", "Updater");
+            }
+            else
+            {
+                var result = hasUpdate ? "New version available" : "Already latest version";
+                LogInfo($"Version check completed - Current: {currentVersion}, Remote: {remoteVersion}, Result: {result}", "Updater");
+            }
+        }
+
+        public static void LogUpdateDownloadStart(string url, string platform)
+        {
+            LogInfo($"Update download started - Platform: {platform}, URL: {url}", "Updater");
+        }
+
+        public static void LogUpdateDownloadResult(bool success, string? filePath = null, string? error = null)
+        {
+            if (success && filePath != null)
+            {
+                LogInfo($"Update download completed - File: {filePath}", "Updater");
+            }
+            else
+            {
+                LogError($"Update download failed - Error: {error ?? "Unknown error"}", "Updater");
+            }
+        }
+
+        public static void LogUpdatePreparation(string action, string? details = null)
+        {
+            var message = string.IsNullOrEmpty(details) ? action : $"{action} - {details}";
+            LogInfo(message, "Updater");
         }
     }
 }

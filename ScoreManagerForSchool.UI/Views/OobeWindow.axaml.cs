@@ -132,20 +132,21 @@ public partial class OobeWindow : Window
                 // show masked placeholder (empty initially)
                 plain.IsReadOnly = false;
                 // handle direct text input (typed characters)
-                plain.TextInput += (_, e) =>
+        plain.TextInput += (_, e) =>
                 {
                     try
                     {
                         if (_revealed.Contains(plain)) return;
-                        var ch = e.Text ?? string.Empty;
-                        var real = (string?)plain.Tag ?? string.Empty;
-                        var pos = Math.Min(plain.SelectionStart, real.Length);
-                        var sel = plain.SelectedText?.Length ?? 0;
-                        if (sel > 0) real = real.Remove(pos, sel);
-                        real = real.Insert(pos, ch);
+            var ch = e.Text ?? string.Empty;
+            var real = (string?)plain.Tag ?? string.Empty;
+            var pos = Math.Clamp(plain.SelectionStart, 0, real.Length);
+            var sel = Math.Clamp(plain.SelectedText?.Length ?? 0, 0, Math.Max(0, real.Length - pos));
+            if (sel > 0) real = real.Remove(pos, sel);
+            if (pos > real.Length) pos = real.Length;
+            real = real.Insert(pos, ch);
                         plain.Tag = real;
                         plain.Text = new string('●', real.Length);
-                        plain.SelectionStart = pos + ch.Length;
+            plain.SelectionStart = Math.Clamp(pos + ch.Length, 0, real.Length);
                         e.Handled = true;
                     }
                     catch { }
@@ -160,42 +161,42 @@ public partial class OobeWindow : Window
                         if (e.Key == Key.Back)
                         {
                             var real = (string?)plain.Tag ?? string.Empty;
-                            var pos = plain.SelectionStart;
-                            var sel = plain.SelectedText?.Length ?? 0;
+                            var pos = Math.Clamp(plain.SelectionStart, 0, real.Length);
+                            var sel = Math.Clamp(plain.SelectedText?.Length ?? 0, 0, Math.Max(0, real.Length - pos));
                             if (sel > 0)
                             {
                                 real = real.Remove(pos, sel);
                                 plain.Tag = real;
                                 plain.Text = new string('●', real.Length);
-                                plain.SelectionStart = pos;
+                                plain.SelectionStart = Math.Clamp(pos, 0, real.Length);
                             }
                             else if (pos > 0)
                             {
                                 real = real.Remove(pos - 1, 1);
                                 plain.Tag = real;
                                 plain.Text = new string('●', real.Length);
-                                plain.SelectionStart = pos - 1;
+                                plain.SelectionStart = Math.Clamp(pos - 1, 0, real.Length);
                             }
                             e.Handled = true;
                         }
                         else if (e.Key == Key.Delete)
                         {
                             var real = (string?)plain.Tag ?? string.Empty;
-                            var pos = plain.SelectionStart;
-                            var sel = plain.SelectedText?.Length ?? 0;
+                            var pos = Math.Clamp(plain.SelectionStart, 0, real.Length);
+                            var sel = Math.Clamp(plain.SelectedText?.Length ?? 0, 0, Math.Max(0, real.Length - pos));
                             if (sel > 0)
                             {
                                 real = real.Remove(pos, sel);
                                 plain.Tag = real;
                                 plain.Text = new string('●', real.Length);
-                                plain.SelectionStart = pos;
+                                plain.SelectionStart = Math.Clamp(pos, 0, real.Length);
                             }
                             else if (pos < real.Length)
                             {
                                 real = real.Remove(pos, 1);
                                 plain.Tag = real;
                                 plain.Text = new string('●', real.Length);
-                                plain.SelectionStart = pos;
+                                plain.SelectionStart = Math.Clamp(pos, 0, real.Length);
                             }
                             e.Handled = true;
                         }
@@ -227,6 +228,7 @@ public partial class OobeWindow : Window
                     if (!_revealed.Contains(plain))
                     {
                         plain.Text = new string('●', real.Length);
+                        plain.SelectionStart = Math.Clamp(plain.SelectionStart, 0, real.Length);
                     }
                 }
                 catch { }

@@ -69,14 +69,13 @@
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
           <TextBlock Text="教师列表" FontWeight="Bold" Margin="0,0,0,4"/>
           
-          <!-- 表头 -->
+          <!-- 表头（移除工号，仅界面隐藏，不影响数据） -->
           <Border Grid.Row="1" Background="#F5F5F5" Padding="12,8" CornerRadius="4">
-            <Grid ColumnDefinitions="80,120,100,100,*" ColumnSpacing="16">
-              <TextBlock Text="工号" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
-              <TextBlock Grid.Column="1" Text="姓名" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
-              <TextBlock Grid.Column="2" Text="科目" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
-              <TextBlock Grid.Column="3" Text="科目组" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
-              <TextBlock Grid.Column="4" Text="任教班级" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
+            <Grid ColumnDefinitions="120,100,100,*" ColumnSpacing="16">
+              <TextBlock Text="姓名" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
+              <TextBlock Grid.Column="1" Text="科目" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
+              <TextBlock Grid.Column="2" Text="科目组" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
+              <TextBlock Grid.Column="3" Text="任教班级" FontWeight="SemiBold" FontSize="13" Foreground="#555"/>
             </Grid>
           </Border>
           

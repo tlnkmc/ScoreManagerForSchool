@@ -151,6 +151,9 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 var query = Query?.Trim() ?? string.Empty;
                 var filtered = _allEvaluations.AsEnumerable();
 
+                // 过滤掉待处理项（没有学生姓名的记录）
+                filtered = filtered.Where(e => !string.IsNullOrWhiteSpace(e.Name));
+
                 // 文本搜索筛选
                 if (!string.IsNullOrWhiteSpace(query))
                 {

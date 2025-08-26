@@ -201,21 +201,21 @@ namespace ScoreManagerForSchool.Core.Storage
         {
             try
             {
-                var result = "🖥️ 环境信息诊断：\n";
-                result += $"机器名: {Environment.MachineName ?? "未知"}\n";
-                result += $"用户名: {Environment.UserName ?? "未知"}\n";
-                result += $"操作系统: {Environment.OSVersion}\n";
-                result += $"处理器数: {Environment.ProcessorCount}\n";
-                result += $"系统目录: {Environment.SystemDirectory}\n";
+                var result = "Environment information diagnostics:\n";
+                result += $"Machine name: {Environment.MachineName ?? "Unknown"}\n";
+                result += $"User name: {Environment.UserName ?? "Unknown"}\n";
+                result += $"Operating system: {Environment.OSVersion}\n";
+                result += $"Processor count: {Environment.ProcessorCount}\n";
+                result += $"System directory: {Environment.SystemDirectory}\n";
                 
                 var envKey = GenerateEnvironmentKey();
-                result += $"环境密钥哈希: {Convert.ToHexString(envKey)[0..8]}...\n";
+                result += $"Environment key hash: {Convert.ToHexString(envKey)[0..8]}...\n";
                 
                 return result;
             }
             catch (Exception ex)
             {
-                return $"❌ 获取环境信息失败: {ex.Message}";
+                return $"Failed to get environment information: {ex.Message}";
             }
         }
         

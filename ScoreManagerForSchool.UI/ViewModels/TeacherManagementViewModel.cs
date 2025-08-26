@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ScoreManagerForSchool.Core.Storage;
+using ScoreManagerForSchool.Core.Tools;
 using Avalonia.Platform.Storage;
 
 namespace ScoreManagerForSchool.UI.ViewModels
@@ -263,9 +264,12 @@ namespace ScoreManagerForSchool.UI.ViewModels
             get => _searchQuery;
             set
             {
-                _searchQuery = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SearchQuery)));
-                FilterTeachers();
+                if (_searchQuery != value)
+                {
+                    _searchQuery = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SearchQuery)));
+                    FilterTeachers();
+                }
             }
         }
 

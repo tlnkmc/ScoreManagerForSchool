@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
 using ScoreManagerForSchool.Core.Storage;
+using ScoreManagerForSchool.Core.Logging;
 using Avalonia;
 using Avalonia.Styling;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -232,41 +233,58 @@ namespace ScoreManagerForSchool.UI.ViewModels
                 
                 if (string.IsNullOrWhiteSpace(feed))
                 {
+                    Logger.LogError("Manual update check failed - Update source configuration is incorrect", "SettingsViewModel");
                     await ShowUpdateResultDialogAsync("配置错误", "更新源配置不正确");
                     return;
                 }
 
+                Logger.LogInfo($"Manual update check started - Update source: {UpdateSource}, URL: {feed}", "SettingsViewModel");
                 var info = await UI.Services.Updater.CheckAsync(feed!);
                 if (info == null || string.IsNullOrWhiteSpace(info.Version))
                 {
+                    Logger.LogWarning("Manual update check failed - Unable to get remote version info", "SettingsViewModel");
                     await ShowUpdateResultDialogAsync("检查失败", "无法获取更新信息，请检查网络连接或更新源配置");
                     return;
                 }
                 
                 var current = UI.Services.Updater.GetCurrentVersion();
-                if (!UI.Services.Updater.IsNewer(current, info.Version!))
+                var hasUpdate = UI.Services.Updater.IsNewer(current, info.Version!);
+                Logger.LogInfo($"Manual update check completed - Current version: {current}, Remote version: {info.Version}, Has new version: {hasUpdate}", "SettingsViewModel");
+                
+                if (!hasUpdate)
                 {
+                    Logger.LogInfo("Already latest version", "SettingsViewModel");
                     await ShowUpdateResultDialogAsync("已是最新版本", $"当前版本：{current}\n最新版本：{info.Version}\n\n您使用的已经是最新版本");
                     return;
                 }
 
                 // 有新版本，询问是否下载更新
+                Logger.LogInfo("New version found, showing update confirmation dialog", "SettingsViewModel");
                 var shouldUpdate = await ShowUpdateAvailableDialogAsync(current, info);
-                if (!shouldUpdate) return;
+                if (!shouldUpdate) 
+                {
+                    Logger.LogInfo("User chose not to update", "SettingsViewModel");
+                    return;
+                }
 
+                Logger.LogInfo("User confirmed update, starting update package download", "SettingsViewModel");
                 // 下载并准备更新包
                 var pkg = await UI.Services.Updater.DownloadAndPrepareUpdateAsync(info, UpdateSource, _baseDir);
                 if (string.IsNullOrWhiteSpace(pkg))
                 {
+                    Logger.LogError("Manual update package download failed", "SettingsViewModel");
                     await ShowUpdateResultDialogAsync("下载失败", "下载更新包失败，请稍后重试");
                     return;
                 }
 
+                Logger.LogInfo($"Manual update package download succeeded: {pkg}", "SettingsViewModel");
+                Logger.LogInfo("Preparing to launch updater program", "SettingsViewModel");
                 // 启动更新器
                 UI.Services.Updater.StartUpdaterU(_baseDir);
             }
             catch (System.Exception ex)
             {
+                Logger.LogError($"Exception occurred during manual update check: {ex.Message}", "SettingsViewModel", ex);
                 await ShowUpdateResultDialogAsync("检查失败", $"更新检查时发生错误：{ex.Message}");
             }
         }

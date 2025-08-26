@@ -591,22 +591,23 @@
               </TextBlock>
 
               <!-- 编辑模式 - 主题适配版本 -->
-              <DatePicker Grid.Column="0" 
-                         SelectedDate="{Binding Date, Mode=TwoWay}" 
-                         FontSize="12" 
-                         Width="220"
-                         Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                         BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                         BorderThickness="1"
-                         CornerRadius="6">
-                <DatePicker.IsVisible>
+              <!-- 日期不可编辑，显示为只读文本 -->
+              <Border Grid.Column="0" 
+                      Background="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}"
+                      CornerRadius="6"
+                      Padding="8,4"
+                      ToolTip.Tip="日期不可更改">
+                <Border.IsVisible>
                   <MultiBinding Converter="{StaticResource EqualsConverter}">
                     <Binding Path="#Root.DataContext.EditingId"/>
                     <Binding Path="Id"/>
                   </MultiBinding>
-                </DatePicker.IsVisible>
-              </DatePicker>
+                </Border.IsVisible>
+                <TextBlock Text="{Binding Date, StringFormat=M/d HH:mm}" 
+                          FontSize="12"
+                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                          VerticalAlignment="Center"/>
+              </Border>
               <TextBox Grid.Column="1" Text="{Binding Class, Mode=TwoWay}">
                 <TextBox.IsVisible>
                   <MultiBinding Converter="{StaticResource EqualsConverter}">

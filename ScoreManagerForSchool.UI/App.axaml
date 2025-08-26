@@ -17,6 +17,8 @@
             <converters:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
             <converters:StringToColorConverter x:Key="StringToColorConverter" />
             <converters:StringToBrushConverter x:Key="StringToBrushConverter" />
+            <converters:CriticalLevelToBackgroundConverter x:Key="CriticalLevelToBackgroundConverter" />
+            <converters:CriticalLevelToForegroundConverter x:Key="CriticalLevelToForegroundConverter" />
         </Application.Resources>
         <Application.Styles>
         <FluentTheme />
