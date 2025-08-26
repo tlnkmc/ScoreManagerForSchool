@@ -1,3 +1,9 @@
+# Release packages
+ScoreManagerForSchool-*.zip
+ScoreManagerForSchool-*.tar.gz
+releases/ScoreManagerForSchool-*.zip
+releases/ScoreManagerForSchool-*.tar.gz
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

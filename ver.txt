@@ -10,12 +10,12 @@ Notes=版本 1.0.3.1007 更新内容：
 - 清理冗余的临时文件和测试代码
 
 # Windows 平台
-Winx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-win-x64.zip
-Winarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-win-arm64.zip
+Winx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-win-x64.zip
+Winarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-win-arm64.zip
 
 # Linux 平台
-Linuxx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-linux-x64.tar.gz
+Linuxx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-linux-x64.tar.gz
 
 # macOS 平台
-Macosx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-osx-x64.tar.gz
+Macosx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-osx-x64.tar.gz
 Macosarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-osx-arm64.tar.gz
