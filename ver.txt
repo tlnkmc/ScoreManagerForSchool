@@ -1,21 +1,16 @@
 # 学校积分管理器更新配置文件
-# 版本: 1.0.3.1007 (正式版)
+# 版本: 1.0.4.1010 (正式版)
 
-Version=1.0.3.1007
-Notes=版本 1.0.3.1007 更新内容：
-- 修复自动更新检测重复触发的问题
-- 优化日志系统，改为英文日志避免编码问题
-- 增强版本检查和更新流程的日志记录
-- 提升系统稳定性和诊断能力
-- 清理冗余的临时文件和测试代码
+Version=1.0.4.1010
+Notes=版本 1.0.4.1010 更新内容：\n- 修复教师累计积分统计来源，统一以主评价表汇总\n- 修复离开教师页面的绑定类型异常\n- 导出新增“教师与科目组统计”开关与时间范围对齐\n- 更新流程下载位置调整至根目录/update 并重命名为 update\n- 稳定性与日志优化
 
 # Windows 平台
-Winx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-win-x64.zip
-Winarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-win-arm64.zip
+Winx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.4.1010/ScoreManagerForSchool-win-x64.zip
+Winarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.4.1010/ScoreManagerForSchool-win-arm64.zip
 
 # Linux 平台
-Linuxx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-linux-x64.tar.gz
+Linuxx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.4.1010/ScoreManagerForSchool-linux-x64.tar.gz
 
 # macOS 平台
-Macosx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.3.1007/ScoreManagerForSchool-osx-x64.tar.gz
-Macosarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.2.1004/ScoreManagerForSchool-osx-arm64.tar.gz
+Macosx64=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.4.1010/ScoreManagerForSchool-osx-x64.tar.gz
+Macosarm=https://github.com/tlnkmc/ScoreManagerForSchool/releases/download/v1.0.4.1010/ScoreManagerForSchool-osx-arm64.tar.gz
